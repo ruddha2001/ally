@@ -3,7 +3,7 @@ import { ApplicationCommandOptionType } from 'discord.js';
 export type CommandType = {
     name: string;
     description: string;
-    options: {
+    options?: {
         name: string;
         description: string;
         type: ApplicationCommandOptionType;

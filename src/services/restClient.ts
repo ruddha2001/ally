@@ -9,13 +9,15 @@ export class DiscordRestClient {
         this.client = new REST().setToken(token);
     }
 
-    static async registerGlobalCommands(token: string, clientId: string) {
+    static async registerGlobalCommands(token: string, clientId: string, guildId: string = '') {
         if (!DiscordRestClient.client) {
             DiscordRestClient.initClient(token);
         }
         try {
             const data: any = await DiscordRestClient.client?.put(
-                Routes.applicationCommands(clientId),
+                process.env.NODE_ENV === 'development'
+                    ? Routes.applicationGuildCommands(clientId, guildId)
+                    : Routes.applicationCommands(clientId),
                 {
                     body: commandList,
                 },
