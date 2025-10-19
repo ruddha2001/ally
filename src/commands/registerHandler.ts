@@ -26,7 +26,9 @@ export const registerHandler = async (command: ChatInputCommandInteraction) => {
             return await ErrorResponses.INVALID_NATION_ID(command);
         }
 
-        const verificationStatus = await checkNationVerificationStatus(numericNationId);
+        const verificationStatus = await checkNationVerificationStatus({
+            nation_id: numericNationId,
+        });
         if (verificationStatus.status) {
             if (!verificationStatus.expired) {
                 return await command.reply('You are already verified! Feel free to use Ally!');
@@ -54,7 +56,7 @@ export const registerHandler = async (command: ChatInputCommandInteraction) => {
             );
         }
 
-        upsertNationdDataToStorage(numericNationId, nationData);
+        upsertNationdDataToStorage(numericNationId, nationData, user.username);
         await command.reply(`
 ✅ Congrats **${user.username}** aka **${nationData.leader_name}**!
 You have been registered successfully as the leader of the nation **${nationData.nation_name}** 🥷

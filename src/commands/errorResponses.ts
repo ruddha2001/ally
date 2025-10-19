@@ -11,6 +11,15 @@ Please retry your current operation, and if the issue persists, lodge a complain
 It seems that your nation ID/URL is not a valid one.
 Please retry; your nation URL will look like https://politicsandwar.com/nation/id=6`);
     }
+    static async INVALID_ALLIANCE_ID(command: ChatInputCommandInteraction) {
+        await command.reply(`
+It seems that your alliance ID/URL is not a valid one.
+Please retry; your nation URL will look like https://politicsandwar.com/alliance/id=6`);
+    }
+    static async NOT_IN_ALLIANCE(command: ChatInputCommandInteraction) {
+        await command.reply(`
+You are not in the alliance that you are trying to register for. You can only register for your own alliance where you are the Leader`);
+    }
     static async INVALID_DISCORD_OR_MISMATCH(
         command: ChatInputCommandInteraction,
         isExpired: boolean = false,
@@ -26,5 +35,17 @@ It seems that I could not verify your account. It is beacause of either:
 You can add your Discord Username to your PnW account at https://politicsandwar.com/nation/edit/ (scroll to the very bottom)
 Please retry again once you are sure your Discord Username is updated in your PnW account and you are using the correct nation ID/URL.`,
         );
+    }
+    static async NOT_REGISTERD(command: ChatInputCommandInteraction) {
+        await command.reply(`
+It seems that I do not know who you are. Please use \'/register\' and follow the instructions before retrying again.`);
+    }
+    static async NOT_PRIVILEDGED(
+        command: ChatInputCommandInteraction,
+        required: string,
+        present: string,
+    ) {
+        await command.reply(`
+You do not have the priviledge to run this command. You need to be a ${required} or above. You are currently a ${present}.`);
     }
 }

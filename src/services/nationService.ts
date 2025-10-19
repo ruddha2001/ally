@@ -9,6 +9,7 @@ import {
 import { Database } from '../lib/mongoDbClient.js';
 
 export const getNationData = async (nationId: number): Promise<NationDataInterface | null> => {
+    // TODO: [IMPORTANT] Use dbCache with TTL
     const response = await GqlClient.getClient().query<{ nations: NationsInterface }>({
         query: gql`
             query ($nationId: [Int]) {
@@ -17,6 +18,10 @@ export const getNationData = async (nationId: number): Promise<NationDataInterfa
                         nation_name
                         leader_name
                         discord
+                        alliance_position
+                        alliance {
+                            id
+                        }
                     }
                 }
             }
@@ -34,33 +39,38 @@ export const getNationData = async (nationId: number): Promise<NationDataInterfa
     return nationsData[0];
 };
 
-export const checkNationVerificationStatus = async (
-    numericNationId: number,
-): Promise<{ status: boolean; expired: boolean }> => {
+export const checkNationVerificationStatus = async (filter: {
+    nation_id?: number;
+    discord_username?: string;
+}): Promise<{ status: boolean; expired: boolean; nationId: number | null }> => {
     const result = await (await Database.getDatabse())
         .collection('nationsStatic')
-        .findOne<StaticNationDataInterface>({ nation_id: numericNationId });
+        .findOne<StaticNationDataInterface>(filter);
     if (!result) {
         return {
             status: false,
             expired: false,
+            nationId: null,
         };
     }
     if (result.expires_at < new Date()) {
         return {
             status: true,
             expired: true,
+            nationId: result.nation_id,
         };
     }
     return {
         status: true,
         expired: false,
+        nationId: result.nation_id,
     };
 };
 
 export const upsertNationdDataToStorage = async (
     numericNationId: number,
     data: NationDataInterface,
+    discordUsername: string,
 ) => {
     (await Database.getDatabse()).collection('nationsStatic').updateOne(
         {
@@ -70,6 +80,7 @@ export const upsertNationdDataToStorage = async (
             $set: {
                 nation_id: numericNationId,
                 expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+                discord_username: discordUsername,
             },
         },
         { upsert: true },

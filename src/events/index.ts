@@ -15,4 +15,6 @@ export const attachEventListeners = () => {
     DiscordGatewayClient.getClient().on('interactionCreate', (interaction) => {
         interactionCreateHandler(interaction);
     });
+
+    DiscordGatewayClient.getClient().on('guildMemberAdd', (member) => {});
 };
