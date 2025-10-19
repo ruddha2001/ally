@@ -1,0 +1,31 @@
+{
+    "name": "ally",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "start": "tsx src/index.ts",
+        "lint": "eslint \"src/**/*.ts\"",
+        "format": "prettier --write \"src/**/*.ts\""
+    },
+    "type": "module",
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@types/node": "^24.8.1",
+        "@typescript-eslint/eslint-plugin": "^8.46.1",
+        "@typescript-eslint/parser": "^8.46.1",
+        "eslint": "^9.38.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "prettier": "^3.6.2",
+        "tsx": "^4.20.6",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "discord.js": "^14.23.2",
+        "dotenv": "^17.2.3",
+        "winston": "^3.18.3"
+    }
+}
