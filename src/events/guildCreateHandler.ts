@@ -1,6 +1,6 @@
 import { Guild, GuildMember } from 'discord.js';
 
-import logger from '../services/logger.js';
+import logger from '../lib/logger.js';
 
 export const guildCreateHandler = async (guild: Guild) => {
     logger.info(

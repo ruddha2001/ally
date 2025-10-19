@@ -1,10 +1,10 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import { DiscordGatewayClient } from './services/gatewayClient.js';
-import { DiscordRestClient } from './services/restClient.js';
+import { DiscordGatewayClient } from './lib/gatewayClient.js';
+import { DiscordRestClient } from './lib/restClient.js';
 import { attachEventListeners } from './events/index.js';
-import { Database } from './services/mongoDbClient.js';
+import { Database } from './lib/mongoDbClient.js';
 
 const initApp = async () => {
     attachEventListeners();

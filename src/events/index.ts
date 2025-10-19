@@ -1,4 +1,4 @@
-import { DiscordGatewayClient } from '../services/gatewayClient.js';
+import { DiscordGatewayClient } from '../lib/gatewayClient.js';
 import { clientReadyHandler } from './clientReadyHandler.js';
 import { guildCreateHandler } from './guildCreateHandler.js';
 import { interactionCreateHandler } from './interactionCreateHandler.js';

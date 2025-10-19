@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, Interaction } from 'discord.js';
 
 import { setupHandler } from '../commands/setupHandler.js';
-import logger from '../services/logger.js';
+import logger from '../lib/logger.js';
 import { registerHandler } from '../commands/registerHandler.js';
 
 export const interactionCreateHandler = (interaction: Interaction) => {

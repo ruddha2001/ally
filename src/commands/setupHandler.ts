@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
-import logger from '../services/logger.js';
+import logger from '../lib/logger.js';
 
 export const setupHandler = async (command: ChatInputCommandInteraction) => {
     const { guild, guildId, commandName } = command;
