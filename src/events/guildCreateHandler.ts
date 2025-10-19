@@ -14,13 +14,13 @@ Hello **${owner.user.tag}**!
 Thank you for adding me to your server, **${guild.name}**!
 I will be helping you manage your alliance effectively.
 
-Before we start, please use the command \`/ally setup\` in the server to register your alliance with me.
+Before we start, please use the command \`/ally register\` in the server to register your PnW account with me.
 
 Cheers!
 From Your Friendly Neighbourhood Alliance Management Bot 🤖
         `.trim();
         await owner.send(welcomeText);
-        logger.info(`Successfully messaged the owner of ${guild.name}.`);
+        logger.debug(`Successfully messaged the owner of ${guild.name}.`);
     } catch (error) {
         logger.warn(`Could not DM the owner of ${guild.name}. Their DMs might be closed.`);
         logger.error(`Error details on guildCreate for ${guild.name}:`, error);

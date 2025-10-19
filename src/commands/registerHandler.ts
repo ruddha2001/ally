@@ -48,6 +48,12 @@ export const registerHandler = async (command: ChatInputCommandInteraction) => {
             );
         }
 
+        if (verificationStatus.expired) {
+            return await command.reply(
+                'You are already verified (I checked just now)! Feel free to use Ally!',
+            );
+        }
+
         upsertNationdDataToStorage(numericNationId, nationData);
         await command.reply(`
 ✅ Congrats **${user.username}** aka **${nationData.leader_name}**!
