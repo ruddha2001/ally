@@ -8,6 +8,11 @@ import {
 } from '../@types/nations.js';
 import { Database } from '../lib/mongoDbClient.js';
 
+/**
+ * First will check the database, else will query PnW API for nationData
+ * @param nationId The numeric nation ID to fetch
+ * @returns Nation data
+ */
 export const getNationData = async (nationId: number): Promise<NationDataInterface | null> => {
     const resultFromDb = await (await Database.getDatabse())
         .collection('nationsDynamic')
@@ -46,6 +51,11 @@ export const getNationData = async (nationId: number): Promise<NationDataInterfa
     return nationsData[0];
 };
 
+/**
+ * Checks if a nation/user is verified and expiry status of verification (currently set to 15 days)
+ * @param filter An object containing either the nationId or the discordUsername
+ * @returns Verification status of the nation/user
+ */
 export const checkNationVerificationStatus = async (filter: {
     nation_id?: number;
     discord_username?: string;
@@ -74,6 +84,16 @@ export const checkNationVerificationStatus = async (filter: {
     };
 };
 
+/**
+ * Upserts nation verification and dynamic data into MongoDB.
+ *
+ * - Updates or inserts a static record in 'nationsStatic' with nation ID, expiry (15 days from now), and Discord username.
+ * - Updates or inserts dynamic nation data in 'nationsDynamic' with the latest nation info.
+ *
+ * @param numericNationId The numeric nation ID to upsert
+ * @param data The latest nation data to store
+ * @param discordUsername The Discord username associated with the nation
+ */
 export const upsertNationdDataToStorage = async (
     numericNationId: number,
     data: NationDataInterface,
@@ -86,7 +106,7 @@ export const upsertNationdDataToStorage = async (
         {
             $set: {
                 nation_id: numericNationId,
-                expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+                expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
                 discord_username: discordUsername,
             },
         },
