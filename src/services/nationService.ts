@@ -9,7 +9,12 @@ import {
 import { Database } from '../lib/mongoDbClient.js';
 
 export const getNationData = async (nationId: number): Promise<NationDataInterface | null> => {
-    // TODO: [IMPORTANT] Use dbCache with TTL
+    const resultFromDb = await (await Database.getDatabse())
+        .collection('nationsDynamic')
+        .findOne<NationDataInterface>({ nation_id: nationId });
+    if (resultFromDb) {
+        return Promise.resolve(resultFromDb);
+    }
     const response = await GqlClient.getClient().query<{ nations: NationsInterface }>({
         query: gql`
             query ($nationId: [Int]) {
@@ -21,6 +26,7 @@ export const getNationData = async (nationId: number): Promise<NationDataInterfa
                         alliance_position
                         alliance {
                             id
+                            name
                         }
                     }
                 }
@@ -29,6 +35,7 @@ export const getNationData = async (nationId: number): Promise<NationDataInterfa
         variables: {
             nationId,
         },
+        fetchPolicy: 'no-cache',
     });
     const { data } = response;
     const nations = data?.nations;

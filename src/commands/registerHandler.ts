@@ -43,7 +43,6 @@ export const registerHandler = async (command: ChatInputCommandInteraction) => {
         const { discord } = nationData;
 
         if (discord !== user.username && discord !== user.tag) {
-            console.log(discord, user.username);
             return await ErrorResponses.INVALID_DISCORD_OR_MISMATCH(
                 command,
                 verificationStatus.expired,

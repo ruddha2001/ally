@@ -1,6 +1,7 @@
 import { DiscordGatewayClient } from '../lib/gatewayClient.js';
 import { clientReadyHandler } from './clientReadyHandler.js';
 import { guildCreateHandler } from './guildCreateHandler.js';
+import { guildMemberAddHandler } from './guildMemberAddHandler.js';
 import { interactionCreateHandler } from './interactionCreateHandler.js';
 
 export const attachEventListeners = () => {
@@ -16,5 +17,7 @@ export const attachEventListeners = () => {
         interactionCreateHandler(interaction);
     });
 
-    DiscordGatewayClient.getClient().on('guildMemberAdd', (member) => {});
+    DiscordGatewayClient.getClient().on('guildMemberAdd', (member) => {
+        guildMemberAddHandler(member);
+    });
 };

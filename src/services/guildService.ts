@@ -6,3 +6,9 @@ export const upsertGuildToStorage = async (guildData: GuildDataInterface) => {
         .collection('guilds')
         .updateOne({ guild_id: guildData.guild_id }, { $set: guildData }, { upsert: true });
 };
+
+export const getGuildDataFromGuildId = async (guildId: string) => {
+    return await (await Database.getDatabse())
+        .collection('guilds')
+        .findOne<GuildDataInterface>({ guild_id: guildId });
+};

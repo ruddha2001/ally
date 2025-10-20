@@ -42,7 +42,7 @@ export const verifyCommandPriviledge = async (
         // TODO: Try to auto-reverify
     }
 
-    const nationData = await getNationData(numericNationId as number);
+    const nationData = await getNationData(verificationStatus.nationId as number);
     if (!nationData) throw new Error('Invalid nation requested in verifyCommandPriviledge'); // TODO: This should be handled
 
     if (!level) {

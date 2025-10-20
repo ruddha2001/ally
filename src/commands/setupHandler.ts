@@ -41,7 +41,6 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
 
         if (!nationData) return;
 
-        console.log(allianceId, nationData?.alliance.id);
         if (allianceId !== nationData?.alliance.id) {
             return await ErrorResponses.NOT_IN_ALLIANCE(command);
         }
@@ -49,7 +48,7 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
         await upsertGuildToStorage({
             guild_id: guildId as string,
             guild_name: guild?.name as string,
-            welcome_channel: welcomeChannel.name as string,
+            welcome_channel: welcomeChannel.id as string,
             alliance_id: nationData.alliance.id,
             alliance_name: nationData.alliance.name,
             verified_role: verifiedRole.id,
