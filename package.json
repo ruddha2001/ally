@@ -1,17 +1,24 @@
 {
     "name": "ally",
-    "version": "1.0.0",
-    "main": "index.js",
+    "version": "1.0.0-alpha",
+    "main": "src/index.ts",
     "scripts": {
         "start": "tsx src/index.ts",
         "lint": "eslint \"src/**/*.ts\"",
         "format": "prettier --write \"src/**/*.ts\""
     },
     "type": "module",
-    "keywords": [],
-    "author": "",
+    "keywords": [
+        "pnw",
+        "ally",
+        "bot"
+    ],
+    "author": {
+        "name": "Aniruddha Chatterjee",
+        "email": "ruddha@ani.codes"
+    },
     "license": "ISC",
-    "description": "",
+    "description": "Ally is an application built for Politics and War that allows you to manage your alliance effectively",
     "devDependencies": {
         "@types/node": "^24.8.1",
         "@typescript-eslint/eslint-plugin": "^8.46.1",
