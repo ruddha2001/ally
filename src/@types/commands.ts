@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionType, ChannelType } from 'discord.js';
 
 export type CommandType = {
     name: string;
@@ -8,5 +8,6 @@ export type CommandType = {
         description: string;
         type: ApplicationCommandOptionType;
         required: boolean;
+        channel_types?: ChannelType[];
     }[];
 };

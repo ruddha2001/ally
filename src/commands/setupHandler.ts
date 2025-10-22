@@ -36,7 +36,7 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
             {
                 discordUsername: user.username,
             },
-            'MEMBER',
+            process.env.NODE_ENV === 'development' ? 'MEMBER' : 'LEADER',
         );
 
         if (!nationData) return;
@@ -59,6 +59,12 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
 Ahoy Leader **${user.username}**!
 You have successfully linked your alliance **${nationData.alliance.name}** with Ally!
 You can use all Ally services in this server. To use Ally for your alliance outside of this server, please run \`/setup\` in the new server.`);
+        // TODO add check for application settings
+        await command.followUp({
+            content: `
+I can see that you have NOT enabled new applicant management feature of mine. I can help you process new members with ease.
+Please run \'/applicant_settings\' and follow the instructions to enable this feature`,
+        });
     } catch (error) {
         logger.error('Unexpected error in setupHandler', error);
         await ErrorResponses.UNEXPECTED_EXCEPTION(command);

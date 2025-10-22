@@ -48,4 +48,9 @@ It seems that I do not know who you are. Please use \'/register\' and follow the
         await command.reply(`
 You do not have the priviledge to run this command. You need to be a ${required} or above. You are currently a ${present}.`);
     }
+    static async NOT_REGISTERED_ALLIANCE(command: ChatInputCommandInteraction) {
+        await command.reply(`
+You are trying to run an alliance settings command but you have not configured this server to be a part of any alliance.
+Please run \`/setup\` to configure this server for your alliance. Alliances can be configured only by the Leader of the alliance.`);
+    }
 }

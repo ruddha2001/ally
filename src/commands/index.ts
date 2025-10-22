@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionType, ChannelType } from 'discord.js';
 import { CommandType } from '../@types/commands.js';
 
 export const commandList: CommandType[] = [
@@ -43,6 +43,31 @@ export const commandList: CommandType[] = [
                     'A role that allows registered members access to their application tickets and other channels',
                 type: ApplicationCommandOptionType.Role,
                 required: true,
+            },
+        ],
+    },
+    {
+        name: 'applicant_settings',
+        description: 'New Applicant Management - Settings',
+        options: [
+            {
+                name: 'ia_role',
+                description: 'The server IA Role to ping IA staff for new members',
+                type: ApplicationCommandOptionType.Role,
+                required: true,
+            },
+            {
+                name: 'member_role',
+                description: 'The server member role to assign a new member after promotion',
+                type: ApplicationCommandOptionType.Role,
+                required: false,
+            },
+            {
+                name: 'applicant_category',
+                description: 'Enter the category under which to create applicant tickets',
+                type: ApplicationCommandOptionType.Channel,
+                required: false,
+                channel_types: [ChannelType.GuildCategory],
             },
         ],
     },

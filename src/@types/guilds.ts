@@ -6,4 +6,11 @@ export interface GuildDataInterface {
     welcome_channel: string;
     verified_role: string;
     unverified_role: string;
+    application_settings?: GuildApplicationSettings;
+}
+
+export interface GuildApplicationSettings {
+    application_category_id?: string;
+    membership_role?: string;
+    ia_role: string;
 }
