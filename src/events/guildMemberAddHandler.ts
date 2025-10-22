@@ -2,7 +2,7 @@ import { GuildMember } from 'discord.js';
 
 import logger from '../lib/logger.js';
 import { getGuildDataFromGuildId } from '../services/guildService.js';
-import { buttonRowBuilder } from '../shared/commandButtons.js';
+import { buttonRowBuilder } from '../buttons/index.js';
 import { BUTTONS } from '../../constants.js';
 
 export const guildMemberAddHandler = async (member: GuildMember) => {

@@ -1,7 +1,7 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ButtonInteraction, ChatInputCommandInteraction } from 'discord.js';
 
 export class ErrorResponses {
-    static async UNEXPECTED_EXCEPTION(command: ChatInputCommandInteraction) {
+    static async UNEXPECTED_EXCEPTION(command: ChatInputCommandInteraction | ButtonInteraction) {
         await command.reply(`
 Opps! I hit an uninteded snag ⚠️
 Please retry your current operation, and if the issue persists, lodge a complaint at https://ally.ani.codes/complaint`);
