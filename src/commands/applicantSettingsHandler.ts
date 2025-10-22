@@ -3,11 +3,12 @@ import { ChatInputCommandInteraction } from 'discord.js';
 import { getGuildDataFromGuildId, upsertGuildToStorage } from '../services/guildService.js';
 import { ErrorResponses } from './errorResponses.js';
 import { GuildDataInterface } from '../@types/guilds.js';
+import { verifyCommandPriviledge } from '../shared/verificationMiddleware.js';
 import logger from '../lib/logger.js';
 
 export const applicantSettingsHandler = async (command: ChatInputCommandInteraction) => {
     try {
-        const { guildId, options } = command;
+        const { guildId, options, user } = command;
 
         const iaRole = options.getRole('ia_role', true);
         const memberRole = options.getRole('member_role', false);
@@ -17,6 +18,19 @@ export const applicantSettingsHandler = async (command: ChatInputCommandInteract
 
         if (!guildData) {
             return await ErrorResponses.NOT_REGISTERED_ALLIANCE(command);
+        }
+
+        const nationData = await verifyCommandPriviledge(
+            command,
+            {
+                discordUsername: user.username,
+            },
+            process.env.NODE_ENV === 'development' ? 'MEMBER' : 'LEADER',
+        );
+
+        // TODO: Handle nationData null check
+        if (nationData && nationData.alliance.id !== guildData.alliance_id) {
+            return await ErrorResponses.NOT_IN_ALLIANCE(command);
         }
 
         const updatedGuildData: GuildDataInterface = {

@@ -39,6 +39,7 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
             process.env.NODE_ENV === 'development' ? 'MEMBER' : 'LEADER',
         );
 
+        // TODO: Handle this gracefully
         if (!nationData) return;
 
         if (allianceId !== nationData?.alliance.id) {
