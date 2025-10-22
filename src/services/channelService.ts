@@ -1,10 +1,10 @@
-import { Guild } from 'discord.js';
+import { Guild, GuildMember } from 'discord.js';
 import { validChannelTypes } from '../@types/channels.js';
 import { getGuildDataFromGuildId } from './guildService.js';
-import { rename } from 'fs';
 
 export const markApplicantChannelAsVerified = async (
     guild: Guild,
+    user: GuildMember,
     channelName: string,
     nationName: string,
 ): Promise<void> => {
@@ -24,7 +24,11 @@ export const markApplicantChannelAsVerified = async (
 
         const guildData = await getGuildDataFromGuildId(guild.id);
         if (guildData) {
-            const { application_settings } = guildData;
+            const { application_settings, verified_role } = guildData;
+            const verifiedRole = guild.roles.cache.get(verified_role);
+            if (verifiedRole) {
+                await user.roles.add(verifiedRole, 'Member is verified');
+            }
             if (
                 application_settings &&
                 application_settings.ia_role &&

@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Guild } from 'discord.js';
+import { ChatInputCommandInteraction, Guild, GuildMember } from 'discord.js';
 import { ErrorResponses } from './errorResponses.js';
 import {
     checkNationVerificationStatus,
@@ -36,6 +36,7 @@ export const registerHandler = async (command: ChatInputCommandInteraction) => {
                 if (nationData && nationData.nation_name) {
                     markApplicantChannelAsVerified(
                         guild as Guild,
+                        (await guild?.members.fetch(user.id)) as GuildMember,
                         `❌ ${user.displayName}`,
                         nationData.nation_name,
                     );
@@ -71,6 +72,7 @@ You have been registered successfully as the leader of the nation **${nationData
 You can use all Ally services that you have permission for.`);
         markApplicantChannelAsVerified(
             guild as Guild,
+            (await guild?.members.fetch(user.id)) as GuildMember,
             `❌ ${user.displayName}`,
             nationData.nation_name as string,
         );
