@@ -14,7 +14,7 @@ export const guildMemberAddHandler = async (member: GuildMember) => {
     const guildData = await getGuildDataFromGuildId(guildId);
 
     if (!guildData) {
-        logger.error(`Guild ${guildId} is not setup. Ally will not run.`);
+        logger.warn(`Guild ${guildId} is not setup. Ally will not run.`);
         return;
     }
 

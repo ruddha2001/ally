@@ -27,7 +27,7 @@ export const markApplicantChannelAsVerified = async (
             const { application_settings, verified_role } = guildData;
             const verifiedRole = guild.roles.cache.get(verified_role);
             if (verifiedRole) {
-                await user.roles.add(verifiedRole, 'Member is verified');
+                user.roles.add(verifiedRole, 'Member is verified');
             }
             if (
                 application_settings &&

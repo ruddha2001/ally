@@ -53,8 +53,10 @@ You can get your nation ID by logging into PnW, and click on Nation->View from t
         });
     } catch (error) {
         logger.error('Unexpected error in applyForAllianceHandler', error);
-        await command.editReply({
-            content: '❌ An error occurred while processing your request. Please try again.',
-        });
+        if (command.replied) {
+            await command.editReply({
+                content: '❌ An error occurred while processing your request. Please try again.',
+            });
+        }
     }
 };
