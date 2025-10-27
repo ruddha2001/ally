@@ -9,7 +9,7 @@ export class DiscordRestClient {
         this.client = new REST().setToken(token);
     }
 
-    static async registerGlobalCommands(token: string, clientId: string, guildId: string = '') {
+    static async registerCommands(token: string, clientId: string, guildId: string = '') {
         if (!DiscordRestClient.client) {
             DiscordRestClient.initClient(token);
         }
