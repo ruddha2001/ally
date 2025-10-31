@@ -76,7 +76,7 @@ const initApp = async () => {
         );
     } catch (error) {
         console.error(
-            'Unhandled error for server initialization/operation - Gracefully shutting down',
+            'Unhandled error for server initialization - Gracefully shutting down',
             error,
         );
         shutdown();
