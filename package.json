@@ -32,6 +32,8 @@
     },
     "dependencies": {
         "@apollo/client": "^4.0.7",
+        "dayjs": "^1.11.19",
+        "dayjs-plugin-duration": "^0.0.1-security",
         "discord.js": "^14.23.2",
         "dotenv": "^17.2.3",
         "graphql": "^16.11.0",
