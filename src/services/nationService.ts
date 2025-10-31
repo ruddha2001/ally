@@ -2,11 +2,34 @@ import { gql } from '@apollo/client';
 
 import { GqlClient } from '../lib/gqlClient.js';
 import {
+    AllyNation,
     NationDataInterface,
     NationsInterface,
     StaticNationDataInterface,
 } from '../@types/nations.js';
 import { Database } from '../lib/mongoDbClient.js';
+import { PnwKit } from '../lib/pnwKit.js';
+import logger from '../lib/logger.js';
+import { nation } from 'pnwkit-2.0/build/src/interfaces/queries/nation.js';
+
+enum QUERIES {
+    GET_NATION_QUERY = `
+            query ($nationId: [Int]) {
+                nations(id: $nationId) {
+                    data {
+                        nation_name
+                        leader_name
+                        discord
+                        alliance_position
+                        alliance {
+                            id
+                            name
+                        }
+                    }
+                }
+            }
+        `,
+}
 
 /**
  * First will check the database, else will query PnW API for nationData
@@ -119,4 +142,56 @@ export const upsertNationdDataToStorage = async (
         { $set: data },
         { upsert: true },
     );
+};
+
+const verifyNationIntegrity = () => {};
+
+export const getSingleNationDataByDiscordUsername = async (discordUsername: string) => {
+    let finalNationObject = await (await Database.getDatabse())
+        .collection('nations')
+        .findOne<AllyNation>({
+            discord_username: discordUsername,
+        });
+
+    if (!finalNationObject) {
+        return null;
+    }
+
+    // Check last updated, then call getSingleNationByNationId() is needed
+};
+
+export const getSingleNationByNationId = async (nationId: number): Promise<AllyNation | null> => {
+    logger.debug(`[getSingleNationByNationId] Start | Nation ID: ${nationId}`);
+    let finalNationObject = await (await Database.getDatabse())
+        .collection('nations')
+        .findOne<AllyNation>({
+            nation_id: nationId,
+        });
+
+    if (finalNationObject) {
+        logger.debug(
+            `[getSingleNationByNationId] End | Nation ID: ${nationId} - Returning ${finalNationObject}`,
+        );
+        return finalNationObject;
+    }
+
+    let pnwNationData: nation[] | undefined;
+    try {
+        pnwNationData = await PnwKit.getKit()?.nationQuery(
+            { id: [nationId], first: 1 },
+            QUERIES.GET_NATION_QUERY,
+        );
+    } catch (err) {
+        logger.error(err);
+        return null;
+    }
+
+    if (!pnwNationData || !Array.isArray(pnwNationData) || pnwNationData.length === 0) {
+        return null;
+    }
+
+    console.log(pnwNationData);
+
+    logger.debug(`[getSingleNationByNationId] End | Nation ID: ${nationId} - Returning null`);
+    return null;
 };

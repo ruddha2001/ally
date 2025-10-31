@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction } from 'discord.js';
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
 import { getGuildDataFromGuildId } from '../services/guildService.js';
 import { parseNationLinkInput } from '../shared/discordUtils.js';
+import { getSingleNationByNationId } from '../services/nationService.js';
 
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
     try {
@@ -21,6 +22,8 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
                 nation_id_or_link,
             });
         }
+
+        const userNationData = await getSingleNationByNationId(nationId as number);
     } catch (error) {
         if (error instanceof AllyError) {
             throw error;

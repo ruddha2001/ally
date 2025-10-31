@@ -58,3 +58,5 @@ export const verifyCommandPriviledge = async (
 
     return nationData;
 };
+
+export const getVerifiedNationData = async (nationId: number) => {};

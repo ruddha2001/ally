@@ -1,3 +1,6 @@
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import logger from '../lib/logger.js';
+
 export class AllyError extends Error {
     description?: string;
     constructor(message: string, functionName: string, description?: string) {
@@ -30,9 +33,47 @@ Please retry; your nation URL will look like https://politicsandwar.com/nation/i
                 `Guild ID is not in database`,
                 functionName,
                 `The server you are running this command from is not registered with me.
+
 As a PnW Alliance Management Bot, I can help you only in alliance servers.
-If you are the mighty Alliance Leader, please run the command \`setup\` so that I can connect this server to your alliance.
-Only an Alliance Leader can register an alliance.`,
+
+If you are the mighty Alliance Leader, please run the command \`/setup\` so that I can connect this server to your alliance. Only an Alliance Leader can register an alliance.`,
             );
+    }
+};
+
+export const sharedInteractionErrorHandler = async (
+    error: unknown,
+    command: ChatInputCommandInteraction,
+) => {
+    logger.error(error);
+    if (!command.replied) {
+        if (error instanceof AllyError && error.description) {
+            await command.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Orange')
+                        .setTitle(`There was an issue executing /${command.commandName} for you`)
+                        .setDescription(error.description)
+                        .setFooter({
+                            text: 'You can retry this operation by following the instructions above, ensuring you are entering correct parameters. If the issue persists, raise a ticket at https://ally.ani.codes/support',
+                        }),
+                ],
+            });
+        } else {
+            await command.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Red')
+                        .setTitle('Unexpected Error')
+                        .setDescription(
+                            `Well I encountered an error that I do not know how to deal with.`,
+                        )
+                        .addFields({ name: 'command', value: command.commandName })
+                        .setFooter({
+                            text: 'You can retry this operation. If the issue persists, raise a ticket at https://ally.ani.codes/support',
+                        }),
+                ],
+            });
+        }
     }
 };

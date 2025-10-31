@@ -11,7 +11,8 @@ import { registerHandler } from '../commands/registerHandler.js';
 import { applicantSettingsHandler } from '../commands/applicantSettingsHandler.js';
 import { BUTTONS } from '../../constants.js';
 import { applyForAllianceHandler } from '../buttons/applyForAllianceHandler.js';
-import { AllyError } from '../shared/allyError.js';
+import { AllyError, sharedInteractionErrorHandler } from '../shared/allyError.js';
+import { glanceHandler } from '../commands/glanceHandler.js';
 
 export const interactionCreateHandler = async (interaction: Interaction) => {
     // TODO handle no matching case
@@ -55,56 +56,29 @@ Ally slash commands are meant to be run inside a Discord Server.`,
             `Received command: /${commandName} from User: ${command.user.tag} in Guild: ${guild} inside Channel: ${guild.channels.cache.get(command.channel?.id ?? '')?.name}`,
         );
 
-        try {
-            switch (commandName) {
-                case 'setup':
-                    setupHandler(command);
-                    break;
-                case 'register':
-                    registerHandler(command);
-                    break;
+        switch (commandName) {
+            case 'setup':
+                setupHandler(command).catch((error) => {
+                    sharedInteractionErrorHandler(error, command);
+                });
+                break;
+            case 'register':
+                registerHandler(command).catch((error) => {
+                    sharedInteractionErrorHandler(error, command);
+                });
+                break;
 
-                case 'applicant_settings':
-                    applicantSettingsHandler(command);
-                    break;
+            case 'applicant_settings':
+                applicantSettingsHandler(command).catch((error) => {
+                    sharedInteractionErrorHandler(error, command);
+                });
+                break;
 
-                case 'glance':
-                    break;
-            }
-        } catch (error) {
-            logger.error(error);
-            if (!command.replied) {
-                if (error instanceof AllyError && error.description) {
-                    await command.reply({
-                        embeds: [
-                            new EmbedBuilder()
-                                .setColor('Orange')
-                                .setTitle(
-                                    `There was an issue executing /${command.commandName} for you`,
-                                )
-                                .setDescription(error.description)
-                                .setFooter({
-                                    text: 'You can retry this operation by following the instructions above, ensuring you are entering correct parameters. If the issue persists, raise a ticket at https://ally.ani.codes/support',
-                                }),
-                        ],
-                    });
-                } else {
-                    await command.reply({
-                        embeds: [
-                            new EmbedBuilder()
-                                .setColor('Red')
-                                .setTitle('Unexpected Error')
-                                .setDescription(
-                                    `Well I encountered an error that I do not know how to deal with.`,
-                                )
-                                .addFields({ name: 'command', value: command.commandName })
-                                .setFooter({
-                                    text: 'You can retry this operation. If the issue persists, raise a ticket at https://ally.ani.codes/support',
-                                }),
-                        ],
-                    });
-                }
-            }
+            case 'glance':
+                glanceHandler(command).catch((error) => {
+                    sharedInteractionErrorHandler(error, command);
+                });
+                break;
         }
     }
 };
