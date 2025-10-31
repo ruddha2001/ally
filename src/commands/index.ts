@@ -1,18 +1,38 @@
 import { ApplicationCommandOptionType, ChannelType } from 'discord.js';
-import { CommandType } from '../@types/commands.js';
+import { DiscordCommandType, DiscordOptionType } from '../@types/commands.js';
+import logger from '../lib/logger.js';
 
-export const commandList: CommandType[] = [
+const staticOptions: Record<string, { description: string; type: ApplicationCommandOptionType }> = {
+    nation_id_or_link: {
+        description: 'Enter your numeric Nation ID, or enter the full URL to your nation',
+        type: ApplicationCommandOptionType.String,
+    },
+};
+
+const optionsGenerator = (
+    optionList: Array<{ name: string; optional?: boolean }>,
+): DiscordOptionType[] => {
+    const options: DiscordOptionType[] = [];
+    optionList.forEach((option) => {
+        const { name, optional } = option;
+        const staticOptionRecord = staticOptions[name];
+        if (!staticOptionRecord) {
+            logger.warn(`[optionsGenerator] Ignoring unknown command: ${name}`);
+        }
+        options.push({
+            name,
+            ...staticOptionRecord,
+            required: !optional,
+        });
+    });
+    return options;
+};
+
+export const commandList: DiscordCommandType[] = [
     {
         name: 'register',
         description: 'Register your PnW Account with Ally to use all Ally services.',
-        options: [
-            {
-                name: 'nation_id_or_link',
-                description: 'Enter your numeric Nation ID, or enter the full URL to your nation',
-                type: ApplicationCommandOptionType.String,
-                required: true,
-            },
-        ],
+        options: optionsGenerator([{ name: 'nation_id_or_link' }]),
     },
     {
         name: 'setup',
@@ -70,5 +90,10 @@ export const commandList: CommandType[] = [
                 channel_types: [ChannelType.GuildCategory],
             },
         ],
+    },
+    {
+        name: 'glance',
+        description: 'Get the most important info about the nation',
+        options: optionsGenerator([{ name: 'nation_id_or_link', optional: true }]),
     },
 ];

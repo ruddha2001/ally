@@ -7,6 +7,13 @@ export interface GuildDataInterface {
     verified_role: string;
     unverified_role: string;
     application_settings?: GuildApplicationSettings;
+    managed_channels: {
+        [channel_id: string]: {
+            created_at: Date;
+            type: string;
+            nation_id: string;
+        };
+    };
 }
 
 export interface GuildApplicationSettings {

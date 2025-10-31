@@ -63,6 +63,11 @@ import { attachEventListeners } from './events/index.js';
 
 const initApp = async () => {
     console.log(`Starting process on PID ${process.pid}. Check winston log files for all logs.`);
+    if (process.env.NODE_ENV === 'development') {
+        console.log(
+            'Ally is starting in DEVELOPMENT mode. Extra logs that are not part of production will be displayed.',
+        );
+    }
 
     try {
         attachEventListeners();
