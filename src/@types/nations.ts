@@ -22,7 +22,8 @@ export interface StaticNationDataInterface {
     discord_username: string;
 }
 
-export interface AllyNation {
+export interface AllyNationInterface {
+    id?: number;
     nation_name?: string;
     leader_name?: string;
     discord?: string;
@@ -33,9 +34,12 @@ export interface AllyNation {
     };
     resources?: any;
     color_block?: string;
-    last_Active?: string;
+    last_active?: string;
     min_mil_req?: any;
-    spies?: any;
-    cities?: any;
+    spies?: number;
+    num_cities?: number;
+    cities?: {
+        infrastructure?: number;
+    }[];
     ally_last_updated: Date;
 }

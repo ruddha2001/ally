@@ -54,6 +54,10 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
             alliance_name: nationData.alliance.name,
             verified_role: verifiedRole.id,
             unverified_role: unverifiedRole.id,
+            managed_channels: {},
+            config: {
+                dataValidityInMins: 5,
+            },
         });
 
         await command.reply(`

@@ -58,20 +58,14 @@ Ally slash commands are meant to be run inside a Discord Server.`,
 
         switch (commandName) {
             case 'setup':
-                setupHandler(command).catch((error) => {
-                    sharedInteractionErrorHandler(error, command);
-                });
+                setupHandler(command);
                 break;
             case 'register':
-                registerHandler(command).catch((error) => {
-                    sharedInteractionErrorHandler(error, command);
-                });
+                registerHandler(command);
                 break;
 
             case 'applicant_settings':
-                applicantSettingsHandler(command).catch((error) => {
-                    sharedInteractionErrorHandler(error, command);
-                });
+                applicantSettingsHandler(command);
                 break;
 
             case 'glance':

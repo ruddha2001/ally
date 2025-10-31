@@ -1,3 +1,7 @@
+import dayjs, { Dayjs } from 'dayjs';
+import duration from 'dayjs/plugin/duration.js';
+dayjs.extend(duration);
+
 const parseInputToNumericId = (input: string, type?: 'nation' | 'alliance'): number => {
     let processedInput = input;
     if (input.startsWith('http')) {
@@ -36,4 +40,27 @@ const parseInputToNumericId = (input: string, type?: 'nation' | 'alliance'): num
 export const parseNationLinkInput = (input: string | null): number | null => {
     if (!input) return null;
     return parseInputToNumericId(input, 'nation');
+};
+
+export const getColorCircleEmoji = (color: string): string | null => {
+    switch (color) {
+        case 'purple':
+            return '🟣';
+    }
+    return null;
+};
+
+export const dayDiff = (dayJsDate: Dayjs) => {
+    const now = dayjs();
+    const diffMs = now.diff(dayJsDate);
+
+    const dur = dayjs.duration(diffMs);
+
+    const weeks = Math.floor(dur.asWeeks());
+    const days = dur.days();
+    const hours = dur.hours();
+    const minutes = dur.minutes();
+    const seconds = dur.seconds();
+
+    return `${weeks}w ${days}d ${hours}h ${minutes}m ${seconds}s`;
 };

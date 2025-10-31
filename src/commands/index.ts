@@ -7,6 +7,10 @@ const staticOptions: Record<string, { description: string; type: ApplicationComm
         description: 'Enter your numeric Nation ID, or enter the full URL to your nation',
         type: ApplicationCommandOptionType.String,
     },
+    show_result_to_everyone: {
+        description: 'Show results in the channel for everyone to see',
+        type: ApplicationCommandOptionType.Boolean,
+    },
 };
 
 const optionsGenerator = (
@@ -94,6 +98,9 @@ export const commandList: DiscordCommandType[] = [
     {
         name: 'glance',
         description: 'Get the most important info about the nation',
-        options: optionsGenerator([{ name: 'nation_id_or_link', optional: true }]),
+        options: optionsGenerator([
+            { name: 'nation_id_or_link', optional: true },
+            { name: 'show_result_to_everyone', optional: true },
+        ]),
     },
 ];

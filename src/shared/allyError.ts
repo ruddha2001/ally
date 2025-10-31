@@ -45,7 +45,7 @@ export const sharedInteractionErrorHandler = async (
     error: unknown,
     command: ChatInputCommandInteraction,
 ) => {
-    logger.error(error);
+    logger.error('Unexpected Error - handled by sharedInteractionErrorHandler', error);
     if (!command.replied) {
         if (error instanceof AllyError && error.description) {
             await command.reply({
