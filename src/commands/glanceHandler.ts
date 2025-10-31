@@ -61,7 +61,7 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
                     .setDescription(
                         `🔗 Nation Link: https://politicsandwar.com/nation/id=${nationId}
 🎨 Color Bloc: ${getColorCircleEmoji(userNationData?.color_block ?? '') ?? userNationData?.color_block}
-🕕 Last Active: ${lastActiveDayJs.format('DD MMM YYYY HH:mm:ss')} [${dayDiff(lastActiveDayJs)} ago]
+🕕 Last Active: ${lastActiveDayJs.format(guildData?.config.dateFormat)} [${dayDiff(lastActiveDayJs)} ago]
 
 🏢 MMR: Not Available
 🪖 Militarisation: Not Available
@@ -72,7 +72,7 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
                     )
                     .setFooter({
                         text: `Stats by Ally: https://ally.ani.codes
-Data was last updated at ${dayjs(userNationData?.ally_last_updated).format('mm:ss')}`,
+Data was last updated at ${dayjs(userNationData?.ally_last_updated).format(guildData?.config.dateFormat)}`,
                     }),
             ],
             flags: show_everyone ? [] : [MessageFlags.Ephemeral],

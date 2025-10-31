@@ -16,6 +16,7 @@ export interface GuildDataInterface {
     };
     config: {
         dataValidityInMins: number;
+        dateFormat: string;
     };
 }
 

@@ -57,6 +57,7 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
             managed_channels: {},
             config: {
                 dataValidityInMins: 5,
+                dateFormat: 'DD MMM YYYY HH:mm:ss',
             },
         });
 
