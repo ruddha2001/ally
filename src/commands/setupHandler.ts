@@ -1,35 +1,39 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
-import logger from '../lib/logger.js';
 import { verifyCommandPriviledge } from '../shared/verificationMiddleware.js';
 import { ErrorResponses } from './errorResponses.js';
 import { upsertGuildToStorage } from '../services/guildService.js';
+import { parseAllianceLinkInput } from '../shared/discordUtils.js';
+import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
+import { getAllianceById } from '../services/allianceService.js';
+import { getSingleNationDataByDiscordUsername } from '../services/nationService.js';
 
 export const setupHandler = async (command: ChatInputCommandInteraction) => {
     try {
-        const { guild, guildId, commandName, options, user } = command;
+        const { guild, guildId, options, user } = command;
 
-        logger.debug(
-            `Received command: /${commandName} from ${command.user.tag} in Guild: ${guild} (${guildId})`,
-        );
-
-        const allianceIdOrLink = options.getString('alliance_id_or_link', true);
+        const alliance_id_or_link = options.getString('alliance_id_or_link', true);
         const welcomeChannel = options.getChannel('welcome_channel', true);
         const unverifiedRole = options.getRole('unverified_role', true);
         const verifiedRole = options.getRole('registered_role', true);
 
-        let allianceId: string | null = allianceIdOrLink;
-        if (allianceIdOrLink.startsWith('https')) {
-            if (!allianceIdOrLink.includes('alliance')) {
-                return await ErrorResponses.INVALID_NATION_ID(command);
-            }
-            allianceId = allianceIdOrLink.split('=')[1] ?? null;
+        const userNationData = await getSingleNationDataByDiscordUsername(user.username);
+
+        if (!userNationData) {
+            throwStaticError(STATIC_ERROR_CODES.USER_NOT_REGISTERED, 'setupHandler');
         }
 
-        const numericAllianceId = Number(allianceId);
-        if (!allianceId || isNaN(numericAllianceId)) {
-            return await ErrorResponses.INVALID_ALLIANCE_ID(command);
+        const allianceId = parseAllianceLinkInput(alliance_id_or_link);
+
+        if (!allianceId) {
+            throwStaticError(STATIC_ERROR_CODES.INVALID_ALLIANCE_ID, 'setupHandler', {
+                alliance_id_or_link,
+            });
         }
+
+        const allianceData = await getAllianceById(allianceId!.toString());
+
+        console.log(allianceData);
 
         const nationData = await verifyCommandPriviledge(
             command,
@@ -42,7 +46,7 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
         // TODO: Handle this gracefully
         if (!nationData) return;
 
-        if (allianceId !== nationData?.alliance.id) {
+        if (allianceId?.toString() !== nationData?.alliance.id) {
             return await ErrorResponses.NOT_IN_ALLIANCE(command);
         }
 
@@ -72,7 +76,11 @@ I can see that you have NOT enabled new applicant management feature of mine. I 
 Please run \'/applicant_settings\' and follow the instructions to enable this feature`,
         });
     } catch (error) {
-        logger.error('Unexpected error in setupHandler', error);
-        await ErrorResponses.UNEXPECTED_EXCEPTION(command);
+        console.error(error);
+        if (error instanceof AllyError) {
+            throw error;
+        } else {
+            throw new AllyError('Encountered unexpected error', 'glanceHandler');
+        }
     }
 };

@@ -42,6 +42,11 @@ export const parseNationLinkInput = (input: string | null): number | null => {
     return parseInputToNumericId(input, 'nation');
 };
 
+export const parseAllianceLinkInput = (input: string | null): number | null => {
+    if (!input) return null;
+    return parseInputToNumericId(input, 'alliance');
+};
+
 export const getColorCircleEmoji = (color: string): string | null => {
     switch (color) {
         case 'purple':

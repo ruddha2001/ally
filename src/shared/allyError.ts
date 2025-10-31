@@ -11,8 +11,10 @@ export class AllyError extends Error {
 }
 
 export enum STATIC_ERROR_CODES {
+    INVALID_ALLIANCE_ID = 'INVALID_ALLIANCE_ID',
     INVALID_NATION_ID = 'INVALID_NATION_ID',
     SERVER_NOT_REGISTERED = 'SERVER_NOT_REGISTERED',
+    USER_NOT_REGISTERED = 'USER_NOT_REGISTERED',
 }
 
 export const throwStaticError = (
@@ -21,6 +23,13 @@ export const throwStaticError = (
     args?: Record<any, any>,
 ) => {
     switch (errorCode) {
+        case 'INVALID_ALLIANCE_ID':
+            throw new AllyError(
+                `Parsed Alliance ID is null, input was ${args?.alliance_id_or_link}`,
+                functionName,
+                `It seems that the Alliance ID/Link you have entered: ${args?.alliance_id_or_link} is not a valid one.
+Please retry; your nation URL will look like hhttps://politicsandwar.com/alliance/id=14196`,
+            );
         case 'INVALID_NATION_ID':
             throw new AllyError(
                 `Parsed Nation ID is null, input was ${args?.nation_id_or_link}`,
@@ -37,6 +46,14 @@ Please retry; your nation URL will look like https://politicsandwar.com/nation/i
 As a PnW Alliance Management Bot, I can help you only in alliance servers.
 
 If you are the mighty Alliance Leader, please run the command \`/setup\` so that I can connect this server to your alliance. Only an Alliance Leader can register an alliance.`,
+            );
+        case 'USER_NOT_REGISTERED':
+            throw new AllyError(
+                `Discord user is not in databse`,
+                functionName,
+                `It seems that you are not registed with me.
+            
+To use my services, I need to know who you are. Please run the command \`/register\` with your nation ID or link so that I can get to know you.`,
             );
     }
 };

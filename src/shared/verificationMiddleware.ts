@@ -51,10 +51,10 @@ export const verifyCommandPriviledge = async (
 
     const { alliance_position } = nationData;
 
-    // if (alliance_position !== level) {
-    //     await ErrorResponses.NOT_PRIVILEDGED(command, level, alliance_position ?? 'NON-MEMBER');
-    //     return null;
-    // }
+    if (alliance_position !== level) {
+        await ErrorResponses.NOT_PRIVILEDGED(command, level, alliance_position ?? 'NON-MEMBER');
+        return null;
+    }
 
     return nationData;
 };

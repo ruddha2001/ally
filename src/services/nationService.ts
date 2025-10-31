@@ -11,27 +11,7 @@ import { Database } from '../lib/mongoDbClient.js';
 import { PnwKit } from '../lib/pnwKit.js';
 import logger from '../lib/logger.js';
 import { nation } from 'pnwkit-2.0/build/src/interfaces/queries/nation.js';
-
-enum QUERIES {
-    GET_NATION_QUERY = `
-            nation_name
-            leader_name
-            discord
-            id
-            alliance_position
-            alliance {
-                id
-                name
-            }
-            spies
-            last_active
-            color
-            num_cities
-            cities {
-                infrastructure
-            }
-        `,
-}
+import { QUERIES } from './queries.js';
 
 const convertPnWNationToAllyNation = (pnwNation: nation): AllyNationInterface => {
     const transformedNation: AllyNationInterface = {
@@ -183,7 +163,13 @@ export const updateSingleNationData = async (nation: AllyNationInterface) => {
     );
 };
 
-export const getSingleNationDataByDiscordUsername = async (discordUsername: string) => {
+export const getSingleNationDataByDiscordUsername = async (
+    discordUsername: string,
+    validity: number = 5,
+) => {
+    logger.debug(
+        `[getSingleNationDataByDiscordUsername] Start | Discord username: ${discordUsername}`,
+    );
     let finalNationObject = await (await Database.getDatabse())
         .collection('nations')
         .findOne<AllyNationInterface>({
@@ -191,36 +177,63 @@ export const getSingleNationDataByDiscordUsername = async (discordUsername: stri
         });
 
     if (!finalNationObject) {
+        logger.debug(
+            `[getSingleNationDataByDiscordUsername] End | Discord username: ${discordUsername} not in database; returning null`,
+        );
         return null;
     }
 
-    // Check last updated, then call getSingleNationByNationId() is needed
+    if (
+        finalNationObject.ally_last_updated &&
+        new Date().getTime() - new Date(finalNationObject.ally_last_updated).getTime() <=
+            validity * 60 * 1000
+    ) {
+        logger.debug(
+            `[getSingleNationDataByDiscordUsername] End | Valid Nation for Discord username: ${discordUsername} - Returning ${JSON.stringify(finalNationObject)}`,
+        );
+        return finalNationObject;
+    }
+
+    finalNationObject = await getSingleNationByNationId(
+        finalNationObject.id as number,
+        validity,
+        true,
+    );
+
+    logger.debug(
+        `[getSingleNationDataByDiscordUsername] End | Refreshed Nation for Discord username: ${discordUsername} - Returning ${JSON.stringify(finalNationObject)}`,
+    );
+    return finalNationObject;
 };
 
 export const getSingleNationByNationId = async (
     nationId: number,
     validity: number = 5,
+    skipCache: boolean = false,
 ): Promise<AllyNationInterface | null> => {
     logger.debug(`[getSingleNationByNationId] Start | Nation ID: ${nationId}`);
-    let finalNationObject = await (await Database.getDatabse())
-        .collection('nations')
-        .findOne<AllyNationInterface>({
-            id: nationId,
-        });
+    let finalNationObject: AllyNationInterface | null = null;
+    if (!skipCache) {
+        finalNationObject = await (await Database.getDatabse())
+            .collection('nations')
+            .findOne<AllyNationInterface>({
+                id: nationId,
+            });
 
-    if (finalNationObject) {
-        logger.debug(
-            `[getSingleNationByNationId] Database | Found Nation ID: ${nationId} - Checking Validity ${JSON.stringify(finalNationObject)}`,
-        );
-        if (
-            finalNationObject.ally_last_updated &&
-            new Date().getTime() - new Date(finalNationObject.ally_last_updated).getTime() <=
-                validity * 60 * 1000
-        ) {
+        if (finalNationObject) {
             logger.debug(
-                `[getSingleNationByNationId] Database | Valid Nation ID: ${nationId} - Returning ${JSON.stringify(finalNationObject)}`,
+                `[getSingleNationByNationId] Database | Found Nation ID: ${nationId} - Checking Validity ${JSON.stringify(finalNationObject)}`,
             );
-            return finalNationObject;
+            if (
+                finalNationObject.ally_last_updated &&
+                new Date().getTime() - new Date(finalNationObject.ally_last_updated).getTime() <=
+                    validity * 60 * 1000
+            ) {
+                logger.debug(
+                    `[getSingleNationByNationId] Database | Valid Nation ID: ${nationId} - Returning ${JSON.stringify(finalNationObject)}`,
+                );
+                return finalNationObject;
+            }
         }
     }
 
@@ -252,7 +265,7 @@ export const getSingleNationByNationId = async (
     );
 
     logger.debug(
-        `[getSingleNationByNationId] End | Nation ID: ${nationId} - Returning $${JSON.stringify(transformedNation)}`,
+        `[getSingleNationByNationId] End | Nation ID: ${nationId} - Returning ${JSON.stringify(transformedNation)}`,
     );
-    return convertPnWNationToAllyNation(pnwNationData[0]);
+    return transformedNation;
 };
