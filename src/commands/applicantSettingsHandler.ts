@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction } from 'discord.js';
 
-import { getGuildDataFromGuildId, upsertGuildToStorage } from '../services/guildService.js';
+import { getGuildDataByGuildId, updateGuildData } from '../services/guildService.js';
 import { ErrorResponses } from './errorResponses.js';
-import { GuildDataInterface } from '../@types/guilds.js';
+import { AllyGuildDataInterface } from '../@types/guilds.js';
 import { verifyCommandPriviledge } from '../shared/verificationMiddleware.js';
 import logger from '../lib/logger.js';
 
@@ -14,7 +14,7 @@ export const applicantSettingsHandler = async (command: ChatInputCommandInteract
         const memberRole = options.getRole('member_role', false);
         const applicantCategory = options.getChannel('applicant_category', false);
 
-        const guildData = await getGuildDataFromGuildId(guildId as string);
+        const guildData = await getGuildDataByGuildId(guildId as string);
 
         if (!guildData) {
             return await ErrorResponses.NOT_REGISTERED_ALLIANCE(command);
@@ -33,7 +33,7 @@ export const applicantSettingsHandler = async (command: ChatInputCommandInteract
             return await ErrorResponses.NOT_IN_ALLIANCE(command);
         }
 
-        const updatedGuildData: GuildDataInterface = {
+        const updatedGuildData: AllyGuildDataInterface = {
             ...guildData,
             application_settings: {
                 ia_role: iaRole.id,
@@ -42,7 +42,7 @@ export const applicantSettingsHandler = async (command: ChatInputCommandInteract
             },
         };
 
-        await upsertGuildToStorage(updatedGuildData);
+        await updateGuildData(updatedGuildData);
 
         await command.reply(`
 You have successfully updated the settings for my New Applicant Management feature.

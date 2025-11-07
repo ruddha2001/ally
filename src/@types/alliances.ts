@@ -7,6 +7,7 @@ export interface AllyAllianceInterface {
     alliance_positions?: AllyAlliancePositionInterface[];
     discord_link?: string;
     ally_last_updated?: Date;
+    guild_id?: string;
 }
 
 export interface AllyAlliancePositionInterface {

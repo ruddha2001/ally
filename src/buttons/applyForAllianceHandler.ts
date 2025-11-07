@@ -1,6 +1,6 @@
 import { ButtonInteraction, ChannelType, PermissionsBitField } from 'discord.js';
 
-import { getGuildDataFromGuildId } from '../services/guildService.js';
+import { getGuildDataByGuildId } from '../services/guildService.js';
 import logger from '../lib/logger.js';
 import { ErrorResponses } from '../commands/errorResponses.js';
 
@@ -9,7 +9,7 @@ export const applyForAllianceHandler = async (command: ButtonInteraction) => {
         await command.deferReply({ ephemeral: true });
         const { user, guildId, guild } = command;
 
-        const guildData = await getGuildDataFromGuildId(guildId as string);
+        const guildData = await getGuildDataByGuildId(guildId as string);
 
         if (!guild || !guildData || !guildData.application_settings) {
             // Silently ignore

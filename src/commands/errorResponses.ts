@@ -11,11 +11,6 @@ Please retry your current operation, and if the issue persists, lodge a complain
 It seems that your nation ID/URL is not a valid one.
 Please retry; your nation URL will look like https://politicsandwar.com/nation/id=6`);
     }
-    static async INVALID_ALLIANCE_ID(command: ChatInputCommandInteraction) {
-        await command.reply(`
-It seems that your alliance ID/URL is not a valid one.
-Please retry; your nation URL will look like https://politicsandwar.com/alliance/id=6`);
-    }
     static async NOT_IN_ALLIANCE(command: ChatInputCommandInteraction) {
         await command.reply(`
 You are not in the alliance that you are trying to register for. You can only register for your own alliance where you are the Leader`);

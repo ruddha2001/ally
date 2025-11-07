@@ -1,7 +1,7 @@
 import { GuildMember } from 'discord.js';
 
 import logger from '../lib/logger.js';
-import { getGuildDataFromGuildId } from '../services/guildService.js';
+import { getGuildDataByGuildId } from '../services/guildService.js';
 import { buttonRowBuilder } from '../buttons/index.js';
 import { BUTTONS } from '../../constants.js';
 
@@ -11,7 +11,7 @@ export const guildMemberAddHandler = async (member: GuildMember) => {
         return;
     }
     const guildId = member.guild.id;
-    const guildData = await getGuildDataFromGuildId(guildId);
+    const guildData = await getGuildDataByGuildId(guildId);
 
     if (!guildData) {
         logger.warn(`Guild ${guildId} is not setup. Ally will not run.`);

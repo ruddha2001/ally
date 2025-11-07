@@ -13,17 +13,21 @@ const convertPnWAllianceToAllyAlliance = (pnwAlliance: alliance): AllyAllianceIn
         color: pnwAlliance.color as string | undefined,
         score: pnwAlliance.score as number | undefined,
         discord_link: pnwAlliance.discord_link as string | undefined,
-        alliance_positions: pnwAlliance.alliance_positions?.map((position: allliancePosition) => ({
-            id: position.id as string,
-            permissions: {
-                view_bank: position.view_bank as boolean,
-                accept_applicants: position.accept_applicants as boolean,
-                withdraw_bank: position.withdraw_bank as boolean,
-                remove_members: position.remove_applicants as boolean,
-            },
-            position_level: position.position_level as number,
-            is_leader: position.leader as boolean,
-        })),
+        alliance_positions: pnwAlliance.alliance_positions
+            ?.map((position: allliancePosition) => ({
+                id: position.id as string,
+                name: position.name as string,
+                permissions: {
+                    view_bank: position.view_bank as boolean,
+                    accept_applicants: position.accept_applicants as boolean,
+                    withdraw_bank: position.withdraw_bank as boolean,
+                    remove_members: position.remove_applicants as boolean,
+                },
+                position_level: position.position_level as number,
+                is_leader: position.leader as boolean,
+            }))
+            .sort((pos1, pos2) => pos1.position_level - pos2.position_level),
+        ally_last_updated: new Date(),
     };
     return transformedAlliance;
 };

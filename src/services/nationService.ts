@@ -17,6 +17,7 @@ const convertPnWNationToAllyNation = (pnwNation: nation): AllyNationInterface =>
     const transformedNation: AllyNationInterface = {
         id: Number(pnwNation.id as string),
         nation_name: pnwNation.nation_name as string | undefined,
+        leader_name: pnwNation.leader_name as string | undefined,
         alliance: {
             id: pnwNation.alliance?.id as string | undefined,
             name: pnwNation.alliance?.name as string | undefined,
@@ -30,6 +31,7 @@ const convertPnWNationToAllyNation = (pnwNation: nation): AllyNationInterface =>
         last_active: pnwNation.last_active,
         color_block: pnwNation.color as string | undefined,
         ally_last_updated: new Date(),
+        discord: pnwNation.discord as string | undefined,
     };
     return transformedNation;
 };
@@ -173,7 +175,7 @@ export const getSingleNationDataByDiscordUsername = async (
     let finalNationObject = await (await Database.getDatabse())
         .collection('nations')
         .findOne<AllyNationInterface>({
-            discord_username: discordUsername,
+            discord: discordUsername,
         });
 
     if (!finalNationObject) {

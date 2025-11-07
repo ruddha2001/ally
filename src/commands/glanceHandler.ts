@@ -2,14 +2,14 @@ import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord
 import dayjs from 'dayjs';
 
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
-import { getGuildDataFromGuildId } from '../services/guildService.js';
+import { getGuildDataByGuildId } from '../services/guildService.js';
 import { dayDiff, getColorCircleEmoji, parseNationLinkInput } from '../shared/discordUtils.js';
 import { getSingleNationByNationId } from '../services/nationService.js';
-import { GuildDataInterface } from '../@types/guilds.js';
+import { AllyGuildDataInterface } from '../@types/guilds.js';
 
 const getNationIdFromChannelId = (
     channelId: string,
-    guildData: GuildDataInterface,
+    guildData: AllyGuildDataInterface,
 ): number | null => {
     if (Object.keys(guildData.managed_channels ?? {}).includes(channelId)) {
         const { nation_id } = guildData.managed_channels[channelId];
@@ -20,9 +20,9 @@ const getNationIdFromChannelId = (
 
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
     try {
-        const { guildId, options, user } = command;
+        const { guildId, options } = command;
 
-        const guildData = await getGuildDataFromGuildId(guildId as string);
+        const guildData = await getGuildDataByGuildId(guildId as string);
 
         if (!guildData) {
             throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'glanceHandler');
@@ -33,7 +33,7 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
         const nationId =
             getNationIdFromChannelId(
                 command.channel?.id as string,
-                guildData as GuildDataInterface,
+                guildData as AllyGuildDataInterface,
             ) ?? parseNationLinkInput(nation_id_or_link);
 
         if (!nationId) {

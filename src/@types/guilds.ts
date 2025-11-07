@@ -1,4 +1,4 @@
-export interface GuildDataInterface {
+export interface AllyGuildDataInterface {
     guild_name: string;
     guild_id: string;
     alliance_name?: string;
@@ -6,7 +6,7 @@ export interface GuildDataInterface {
     welcome_channel: string;
     verified_role: string;
     unverified_role: string;
-    application_settings?: GuildApplicationSettings;
+    application_settings?: AllyGuildApplicationSettings;
     managed_channels: {
         [channel_id: string]: {
             created_at?: Date;
@@ -20,7 +20,7 @@ export interface GuildDataInterface {
     };
 }
 
-export interface GuildApplicationSettings {
+export interface AllyGuildApplicationSettings {
     application_category_id?: string;
     membership_role?: string;
     ia_role: string;

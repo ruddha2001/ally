@@ -1,16 +1,16 @@
-import { GuildDataInterface } from '../@types/guilds.js';
+import { AllyGuildDataInterface } from '../@types/guilds.js';
 import { Database } from '../lib/mongoDbClient.js';
 
-export const upsertGuildToStorage = async (guildData: GuildDataInterface) => {
+export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
     await (await Database.getDatabse())
         .collection('guilds')
         .updateOne({ guild_id: guildData.guild_id }, { $set: guildData }, { upsert: true });
 };
 
-export const getGuildDataFromGuildId = async (guildId: string) => {
+export const getGuildDataByGuildId = async (guildId: string) => {
     return await (await Database.getDatabse())
         .collection('guilds')
-        .findOne<GuildDataInterface>({ guild_id: guildId });
+        .findOne<AllyGuildDataInterface>({ guild_id: guildId });
 };
 
 export const storeChannelId = async (
@@ -19,7 +19,7 @@ export const storeChannelId = async (
     nationId: number,
     channelType?: 'applicant_ticket' | 'support_ticket',
 ) => {
-    const guildData = await getGuildDataFromGuildId(guildId);
+    const guildData = await getGuildDataByGuildId(guildId);
     if (!guildData) return;
 
     guildData.managed_channels[channelId] = {
@@ -28,7 +28,5 @@ export const storeChannelId = async (
         nation_id: nationId.toString(),
     };
 
-    await upsertGuildToStorage(guildData);
-
-    await upsertGuildToStorage(guildData);
+    await updateGuildData(guildData);
 };

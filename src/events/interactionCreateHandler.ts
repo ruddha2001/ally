@@ -11,11 +11,10 @@ import { registerHandler } from '../commands/registerHandler.js';
 import { applicantSettingsHandler } from '../commands/applicantSettingsHandler.js';
 import { BUTTONS } from '../../constants.js';
 import { applyForAllianceHandler } from '../buttons/applyForAllianceHandler.js';
-import { AllyError, sharedInteractionErrorHandler } from '../shared/allyError.js';
+import { sharedInteractionErrorHandler } from '../shared/allyError.js';
 import { glanceHandler } from '../commands/glanceHandler.js';
 
 export const interactionCreateHandler = async (interaction: Interaction) => {
-    // TODO handle no matching case
     if (interaction.isButton()) {
         const command = interaction as ButtonInteraction;
         const { guild, guildId, customId } = command;
@@ -58,7 +57,9 @@ Ally slash commands are meant to be run inside a Discord Server.`,
 
         switch (commandName) {
             case 'setup':
-                setupHandler(command);
+                setupHandler(command).catch((error) => {
+                    sharedInteractionErrorHandler(error, command);
+                });
                 break;
             case 'register':
                 registerHandler(command);

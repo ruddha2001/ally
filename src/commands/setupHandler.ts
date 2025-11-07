@@ -1,15 +1,21 @@
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
 import { verifyCommandPriviledge } from '../shared/verificationMiddleware.js';
 import { ErrorResponses } from './errorResponses.js';
-import { upsertGuildToStorage } from '../services/guildService.js';
+import { getGuildDataByGuildId, updateGuildData } from '../services/guildService.js';
 import { parseAllianceLinkInput } from '../shared/discordUtils.js';
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
-import { getAllianceById } from '../services/allianceService.js';
+import { getAllianceById, updateAllianceData } from '../services/allianceService.js';
 import { getSingleNationDataByDiscordUsername } from '../services/nationService.js';
+import logger from '../lib/logger.js';
+import { AllyAllianceInterface, AllyAlliancePositionInterface } from '../@types/alliances.js';
+import { AllyGuildDataInterface } from '../@types/guilds.js';
+import dayjs from 'dayjs';
 
 export const setupHandler = async (command: ChatInputCommandInteraction) => {
     try {
+        await command.deferReply();
+
         const { guild, guildId, options, user } = command;
 
         const alliance_id_or_link = options.getString('alliance_id_or_link', true);
@@ -33,47 +39,81 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
 
         const allianceData = await getAllianceById(allianceId!.toString());
 
-        console.log(allianceData);
+        const alliancePositions = allianceData?.alliance_positions;
 
-        const nationData = await verifyCommandPriviledge(
-            command,
-            {
-                discordUsername: user.username,
-            },
-            process.env.NODE_ENV === 'development' ? 'MEMBER' : 'LEADER',
-        );
-
-        // TODO: Handle this gracefully
-        if (!nationData) return;
-
-        if (allianceId?.toString() !== nationData?.alliance.id) {
-            return await ErrorResponses.NOT_IN_ALLIANCE(command);
+        if (!alliancePositions) {
+            logger.warn(
+                `[setupHandler] Alliance ${allianceData?.name} has no alliance positions. Continuing alliance setup without permission check.`,
+            );
         }
 
-        await upsertGuildToStorage({
+        const leaderIndex = alliancePositions?.length ?? 0;
+        const leaderPosition = (alliancePositions as AllyAlliancePositionInterface[])[
+            leaderIndex > 0 ? leaderIndex - 1 : 0
+        ];
+
+        if (
+            leaderPosition.name?.toLowerCase() !== userNationData?.alliance_position?.toLowerCase()
+        ) {
+            throwStaticError(STATIC_ERROR_CODES.USER_NOT_PRIVILEDGED, 'setupHandler', {
+                current_position: userNationData?.alliance_position,
+                required_position: leaderPosition.name,
+            });
+        }
+
+        await updateAllianceData({
+            ...(allianceData as AllyAllianceInterface),
             guild_id: guildId as string,
+        });
+
+        let updateFlag = false;
+        if (await getGuildDataByGuildId(guildId as string)) {
+            updateFlag = true;
+        }
+
+        const guildData: AllyGuildDataInterface = {
             guild_name: guild?.name as string,
-            welcome_channel: welcomeChannel.id as string,
-            alliance_id: nationData.alliance.id,
-            alliance_name: nationData.alliance.name,
+            guild_id: guildId as string,
+            managed_channels: {},
+            alliance_name: allianceData?.name as string,
+            alliance_id: allianceData?.id,
+            welcome_channel: welcomeChannel.id,
             verified_role: verifiedRole.id,
             unverified_role: unverifiedRole.id,
-            managed_channels: {},
             config: {
                 dataValidityInMins: 5,
                 dateFormat: 'DD MMM YYYY HH:mm:ss',
             },
-        });
+        };
 
-        await command.reply(`
-Ahoy Leader **${user.username}**!
-You have successfully linked your alliance **${nationData.alliance.name}** with Ally!
-You can use all Ally services in this server. To use Ally for your alliance outside of this server, please run \`/setup\` in the new server.`);
-        // TODO add check for application settings
-        await command.followUp({
-            content: `
-I can see that you have NOT enabled new applicant management feature of mine. I can help you process new members with ease.
-Please run \'/applicant_settings\' and follow the instructions to enable this feature`,
+        await updateGuildData(guildData);
+
+        await command.editReply({
+            embeds: [
+                new EmbedBuilder()
+                    .setColor('Fuchsia')
+                    .setTitle(
+                        updateFlag
+                            ? `Settings have been updated for **${allianceData?.name}**`
+                            : `Welcome **${allianceData?.name}** to your new home at **${guild?.name}**`,
+                    )
+                    .setDescription(
+                        `You have ${updateFlag ? 'updated' : 'setup'} your alliance with Ally. ${updateFlag ? 'Continue using' : 'Welcome to'} smarter alliance management!`,
+                    )
+                    .setFields([
+                        {
+                            name: 'Alliance Name',
+                            value: `[${allianceData?.acronym}] ${allianceData?.name}`,
+                        },
+                        {
+                            name: 'Leader',
+                            value: `${userNationData?.leader_name} of ${userNationData?.nation_name}`,
+                        },
+                    ])
+                    .setFooter({
+                        text: `${updateFlag ? 'Powered by' : 'Welcome to'} Ally: https://ally.ani.codes`,
+                    }),
+            ],
         });
     } catch (error) {
         console.error(error);

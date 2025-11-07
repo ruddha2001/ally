@@ -40,7 +40,7 @@ export const commandList: DiscordCommandType[] = [
     },
     {
         name: 'setup',
-        description: 'Setup your alliance use Ally in this server.',
+        description: 'Setup your alliance to use Ally in this server.',
         options: [
             {
                 name: 'alliance_id_or_link',

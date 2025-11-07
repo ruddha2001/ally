@@ -4,7 +4,7 @@ import logger from '../lib/logger.js';
 export class AllyError extends Error {
     description?: string;
     constructor(message: string, functionName: string, description?: string) {
-        super(`[${functionName} ${message}]`);
+        super(`[${functionName}] ${message}`);
         this.name = 'AllyError';
         this.description = description;
     }
@@ -14,6 +14,7 @@ export enum STATIC_ERROR_CODES {
     INVALID_ALLIANCE_ID = 'INVALID_ALLIANCE_ID',
     INVALID_NATION_ID = 'INVALID_NATION_ID',
     SERVER_NOT_REGISTERED = 'SERVER_NOT_REGISTERED',
+    USER_NOT_PRIVILEDGED = 'USER_NOT_PRIVILEDGED',
     USER_NOT_REGISTERED = 'USER_NOT_REGISTERED',
 }
 
@@ -55,6 +56,15 @@ If you are the mighty Alliance Leader, please run the command \`/setup\` so that
             
 To use my services, I need to know who you are. Please run the command \`/register\` with your nation ID or link so that I can get to know you.`,
             );
+        case 'USER_NOT_PRIVILEDGED':
+            throw new AllyError(
+                `User does not have sufficient permissions`,
+                functionName,
+                `You are not allowed to perform this action. You do not have the required alliance permissions.
+
+You are a ${args?.current_position?.toUpperCase()}.
+You need to be a ${args?.required_position?.toUpperCase()} or above.`,
+            );
     }
 };
 
@@ -65,7 +75,7 @@ export const sharedInteractionErrorHandler = async (
     logger.error('Unexpected Error - handled by sharedInteractionErrorHandler', error);
     if (!command.replied) {
         if (error instanceof AllyError && error.description) {
-            await command.reply({
+            const content = {
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Orange')
@@ -75,9 +85,14 @@ export const sharedInteractionErrorHandler = async (
                             text: 'You can retry this operation by following the instructions above, ensuring you are entering correct parameters. If the issue persists, raise a ticket at https://ally.ani.codes/support',
                         }),
                 ],
-            });
+            };
+            if (command.deferred) {
+                await command.editReply(content);
+            } else {
+                await command.reply(content);
+            }
         } else {
-            await command.reply({
+            const content = {
                 embeds: [
                     new EmbedBuilder()
                         .setColor('Red')
@@ -90,7 +105,12 @@ export const sharedInteractionErrorHandler = async (
                             text: 'You can retry this operation. If the issue persists, raise a ticket at https://ally.ani.codes/support',
                         }),
                 ],
-            });
+            };
+            if (command.deferred) {
+                await command.editReply(content);
+            } else {
+                await command.reply(content);
+            }
         }
     }
 };

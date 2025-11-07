@@ -1,6 +1,6 @@
 import { Guild, GuildMember } from 'discord.js';
 import { validChannelTypes } from '../@types/channels.js';
-import { getGuildDataFromGuildId } from './guildService.js';
+import { getGuildDataByGuildId } from './guildService.js';
 
 export const markApplicantChannelAsVerified = async (
     guild: Guild,
@@ -22,7 +22,7 @@ export const markApplicantChannelAsVerified = async (
             renamedChannel = await channelToFind.setName(`✅ ${nationName}`);
         }
 
-        const guildData = await getGuildDataFromGuildId(guild.id);
+        const guildData = await getGuildDataByGuildId(guild.id);
         if (guildData) {
             const { application_settings, verified_role } = guildData;
             const verifiedRole = guild.roles.cache.get(verified_role);
