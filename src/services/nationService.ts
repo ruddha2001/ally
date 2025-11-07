@@ -112,43 +112,6 @@ export const checkNationVerificationStatus = async (filter: {
     };
 };
 
-/**
- * Upserts nation verification and dynamic data into MongoDB.
- *
- * - Updates or inserts a static record in 'nationsStatic' with nation ID, expiry (15 days from now), and Discord username.
- * - Updates or inserts dynamic nation data in 'nationsDynamic' with the latest nation info.
- *
- * @param numericNationId The numeric nation ID to upsert
- * @param data The latest nation data to store
- * @param discordUsername The Discord username associated with the nation
- */
-export const upsertNationdDataToStorage = async (
-    numericNationId: number,
-    data: NationDataInterface,
-    discordUsername: string,
-) => {
-    (await Database.getDatabse()).collection('nationsStatic').updateOne(
-        {
-            nation_id: numericNationId,
-        },
-        {
-            $set: {
-                nation_id: numericNationId,
-                expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
-                discord_username: discordUsername,
-            },
-        },
-        { upsert: true },
-    );
-    (await Database.getDatabse()).collection('nationsDynamic').updateOne(
-        {
-            nation_id: numericNationId,
-        },
-        { $set: data },
-        { upsert: true },
-    );
-};
-
 export const updateSingleNationData = async (nation: AllyNationInterface) => {
     await (await Database.getDatabse()).collection('nations').updateOne(
         {
