@@ -1,7 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
-import { verifyCommandPriviledge } from '../shared/verificationMiddleware.js';
-import { ErrorResponses } from './errorResponses.js';
 import { getGuildDataByGuildId, updateGuildData } from '../services/guildService.js';
 import { parseAllianceLinkInput } from '../shared/discordUtils.js';
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
@@ -10,7 +8,6 @@ import { getSingleNationDataByDiscordUsername } from '../services/nationService.
 import logger from '../lib/logger.js';
 import { AllyAllianceInterface, AllyAlliancePositionInterface } from '../@types/alliances.js';
 import { AllyGuildDataInterface } from '../@types/guilds.js';
-import dayjs from 'dayjs';
 
 export const setupHandler = async (command: ChatInputCommandInteraction) => {
     try {

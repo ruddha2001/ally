@@ -149,8 +149,6 @@ export const upsertNationdDataToStorage = async (
     );
 };
 
-const verifyNationIntegrity = () => {};
-
 export const updateSingleNationData = async (nation: AllyNationInterface) => {
     await (await Database.getDatabse()).collection('nations').updateOne(
         {
@@ -208,6 +206,19 @@ export const getSingleNationDataByDiscordUsername = async (
     return finalNationObject;
 };
 
+/**
+ * Retrieves a nation's data by nation ID, using cache if available and valid.
+ *
+ * This function first attempts to fetch the nation data from the database cache.
+ * If the cache is valid (within the specified validity window in minutes) and skipCache is false,
+ * it returns the cached data. Otherwise, it queries the PnW API for the latest nation data,
+ * updates the cache, and returns the fresh data.
+ *
+ * @param nationId - The numeric nation ID to fetch.
+ * @param validity - The cache validity window in minutes (default: 5).
+ * @param skipCache - If true, always fetches from the API and updates the cache (default: false).
+ * @returns The AllyNationInterface object for the nation, or null if not found or on error.
+ */
 export const getSingleNationByNationId = async (
     nationId: number,
     validity: number = 5,
