@@ -57,7 +57,9 @@ Ally slash commands are meant to be run inside a Discord Server.`,
                 });
                 break;
             case 'register':
-                registerHandler(command);
+                registerHandler(command).catch((error) => {
+                    sharedInteractionErrorHandler(error, command);
+                });
                 break;
 
             case 'applicant_settings':

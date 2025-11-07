@@ -12,6 +12,7 @@ export class AllyError extends Error {
 
 export enum STATIC_ERROR_CODES {
     INVALID_ALLIANCE_ID = 'INVALID_ALLIANCE_ID',
+    INVALID_DISCORD = 'INVALID_DISCORD',
     INVALID_NATION_ID = 'INVALID_NATION_ID',
     SERVER_NOT_REGISTERED = 'SERVER_NOT_REGISTERED',
     USER_NOT_PRIVILEDGED = 'USER_NOT_PRIVILEDGED',
@@ -30,6 +31,15 @@ export const throwStaticError = (
                 functionName,
                 `It seems that the Alliance ID/Link you have entered: ${args?.alliance_id_or_link} is not a valid one.
 Please retry; your nation URL will look like hhttps://politicsandwar.com/alliance/id=14196`,
+            );
+        case 'INVALID_DISCORD':
+            throw new AllyError(
+                `Discord username does not match nation, nation data is ${args?.nation_discord}, username is ${args?.username}`,
+                functionName,
+                `I could not match your Discord username with your nation. Either you have entered a wrong nation ID (that does not belong to you), or you have not updated your Discord username in your PnW Account.
+                
+You can update your discord username at https://politicsandwar.com/nation/edit/
+Scroll to the very bottom and update your Discord Username.`,
             );
         case 'INVALID_NATION_ID':
             throw new AllyError(

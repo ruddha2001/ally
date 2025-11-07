@@ -8,18 +8,6 @@ import {
 } from '../services/guildService.js';
 import { dayDiff, getColorCircleEmoji, parseNationLinkInput } from '../shared/discordUtils.js';
 import { getSingleNationByNationId } from '../services/nationService.js';
-import { AllyGuildDataInterface } from '../@types/guilds.js';
-
-const getNationIdFromChannelId = (
-    channelId: string,
-    guildData: AllyGuildDataInterface,
-): number | null => {
-    if (Object.keys(guildData.managed_channels ?? {}).includes(channelId)) {
-        const { nation_id } = guildData.managed_channels[channelId];
-        return Number(nation_id);
-    }
-    return null;
-};
 
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
     try {
@@ -37,13 +25,9 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
             guildId as string,
             command.channelId as string,
         );
-        const nationId =
-            getNationIdFromChannelId(
-                command.channel?.id as string,
-                guildData as AllyGuildDataInterface,
-            ) ?? parseNationLinkInput(nationIdFromManagedChannel ?? nation_id_or_link);
+        const nationId = parseNationLinkInput(nationIdFromManagedChannel ?? nation_id_or_link);
 
-        if (!nationIdFromManagedChannel && !nationId) {
+        if (!nationId) {
             throwStaticError(STATIC_ERROR_CODES.INVALID_NATION_ID, 'glanceHandler', {
                 nation_id_or_link,
             });

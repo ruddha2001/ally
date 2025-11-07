@@ -26,7 +26,7 @@ export const getNationIdFromManagedChannelId = async (
     return channel.nation_id;
 };
 
-export const storeChannelId = async (
+export const linkChannelId = async (
     guildId: string,
     channelId: string,
     nationId: number,
