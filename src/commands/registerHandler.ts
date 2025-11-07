@@ -1,12 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, Guild, GuildMember } from 'discord.js';
-import { ErrorResponses } from './errorResponses.js';
-import {
-    checkNationVerificationStatus,
-    getNationData,
-    getSingleNationByNationId,
-    upsertNationdDataToStorage,
-} from '../services/nationService.js';
-import logger from '../lib/logger.js';
+import { getSingleNationByNationId } from '../services/nationService.js';
 import { markApplicantChannelAsVerified } from '../services/channelService.js';
 import { parseNationLinkInput } from '../shared/discordUtils.js';
 import { throwStaticError, STATIC_ERROR_CODES, AllyError } from '../shared/allyError.js';
