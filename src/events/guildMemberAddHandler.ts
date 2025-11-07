@@ -44,7 +44,6 @@ export const guildMemberAddHandler = async (member: GuildMember) => {
 Welcome ${member.user}!
 We heartily welcome you to **${alliance_name}**!
 If you want to apply for this alliance, please click the \`📜 Apply Now\` button at the bottom and we will start the application process.
-If you are a FA member, please select \`🌐 FA Diplomat\` button below and you will be redirected to our FA team.
 If you have any questions, open up a ticket with the \`❓ Help\` button and a help ticket will be created for you.`,
                 components: [buttonRowBuilder([BUTTONS.APPLY_BUTTON]).toJSON()],
             });
