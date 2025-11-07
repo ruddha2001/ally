@@ -2,7 +2,10 @@ import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord
 import dayjs from 'dayjs';
 
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
-import { getGuildDataByGuildId } from '../services/guildService.js';
+import {
+    getGuildDataByGuildId,
+    getNationIdFromManagedChannelId,
+} from '../services/guildService.js';
 import { dayDiff, getColorCircleEmoji, parseNationLinkInput } from '../shared/discordUtils.js';
 import { getSingleNationByNationId } from '../services/nationService.js';
 import { AllyGuildDataInterface } from '../@types/guilds.js';
@@ -30,13 +33,19 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
 
         const show_everyone = options.getBoolean('show_result_to_everyone', false) ?? false;
         const nation_id_or_link = options.getString('nation_id_or_link', false);
+        const nationIdFromManagedChannel = await getNationIdFromManagedChannelId(
+            guildId as string,
+            command.channelId as string,
+        );
         const nationId =
+            nationIdFromManagedChannel ??
             getNationIdFromChannelId(
                 command.channel?.id as string,
                 guildData as AllyGuildDataInterface,
-            ) ?? parseNationLinkInput(nation_id_or_link);
+            ) ??
+            parseNationLinkInput(nation_id_or_link);
 
-        if (!nationId) {
+        if (!nationIdFromManagedChannel && !nationId) {
             throwStaticError(STATIC_ERROR_CODES.INVALID_NATION_ID, 'glanceHandler', {
                 nation_id_or_link,
             });

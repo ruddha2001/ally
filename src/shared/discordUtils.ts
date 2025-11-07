@@ -51,6 +51,8 @@ export const getColorCircleEmoji = (color: string): string | null => {
     switch (color) {
         case 'purple':
             return '🟣';
+        case 'black':
+            return '⚫';
     }
     return null;
 };

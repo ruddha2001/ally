@@ -13,6 +13,19 @@ export const getGuildDataByGuildId = async (guildId: string) => {
         .findOne<AllyGuildDataInterface>({ guild_id: guildId });
 };
 
+export const getNationIdFromManagedChannelId = async (
+    guildId: string,
+    channelId: string,
+): Promise<string | null> => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData || !guildData.managed_channels) return null;
+    const { managed_channels } = guildData;
+    const channel = managed_channels[channelId];
+    if (!channel) return null;
+
+    return channel.nation_id;
+};
+
 export const storeChannelId = async (
     guildId: string,
     channelId: string,
