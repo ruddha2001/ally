@@ -38,12 +38,10 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
             command.channelId as string,
         );
         const nationId =
-            nationIdFromManagedChannel ??
             getNationIdFromChannelId(
                 command.channel?.id as string,
                 guildData as AllyGuildDataInterface,
-            ) ??
-            parseNationLinkInput(nation_id_or_link);
+            ) ?? parseNationLinkInput(nationIdFromManagedChannel ?? nation_id_or_link);
 
         if (!nationIdFromManagedChannel && !nationId) {
             throwStaticError(STATIC_ERROR_CODES.INVALID_NATION_ID, 'glanceHandler', {
