@@ -31,7 +31,7 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
             guildId as string,
             command.channelId as string,
         );
-        const nationId = parseNationLinkInput(nationIdFromManagedChannel ?? nation_id_or_link);
+        const nationId = parseNationLinkInput(nation_id_or_link ?? nationIdFromManagedChannel);
 
         if (!nationId) {
             throwStaticError(STATIC_ERROR_CODES.INVALID_NATION_ID, 'glanceHandler', {
