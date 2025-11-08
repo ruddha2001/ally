@@ -6,7 +6,12 @@ import {
     getGuildDataByGuildId,
     getNationIdFromManagedChannelId,
 } from '../services/guildService.js';
-import { dayDiff, getColorCircleEmoji, parseNationLinkInput } from '../shared/discordUtils.js';
+import {
+    dayDiff,
+    getColorCircleEmoji,
+    mapContinentToName,
+    parseNationLinkInput,
+} from '../shared/discordUtils.js';
 import { getSingleNationByNationId } from '../services/nationService.js';
 
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
@@ -50,17 +55,28 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
                     .setColor('Blurple')
                     .setTitle(`Here is a summary for **${userNationData?.nation_name}**`)
                     .setDescription(
-                        `🔗 Nation Link: https://politicsandwar.com/nation/id=${nationId}
-🎨 Color Bloc: ${getColorCircleEmoji(userNationData?.color_block ?? '') ?? userNationData?.color_block}
-🕕 Last Active: ${lastActiveDayJs.format(guildData?.config.dateFormat)} [${dayDiff(lastActiveDayJs)} ago]
-
-🏢 MMR: Not Available
-🪖 Militarisation: Not Available
-🕵️ Spies: ${userNationData?.spies}
-
-🌆 Number of Cities: ${userNationData?.num_cities}
+                        `🌆 Number of Cities: ${userNationData?.num_cities}
 🏗️ Average Infrastructure: ${averageInfra}`,
                     )
+                    .setFields([
+                        {
+                            name: '📰 **General Details** 📰',
+                            value: `🔗 Nation Link: https://politicsandwar.com/nation/id=${nationId}
+🎨 Color Bloc: ${getColorCircleEmoji(userNationData?.color_block ?? '') ?? userNationData?.color_block}
+🚜 Continent: ${mapContinentToName(userNationData?.continent as string) ?? `Out Of the World? [${userNationData?.continent}]`}
+🕕 Last Active: ${lastActiveDayJs.format(guildData?.config.dateFormat)} [${dayDiff(lastActiveDayJs)} ago]`,
+                        },
+                        {
+                            name: `⚔️ **Millitary Zone** ⚔️`,
+                            value: `🪖 Soldiers: ${userNationData?.millitary?.soldiers ?? 0}
+💣 Tanks: ${userNationData?.millitary?.tanks ?? 0}
+🛩️ Aircrafts: ${userNationData?.millitary?.aircrafts ?? 0}
+🚢 Ships: ${userNationData?.millitary?.ships ?? 0}
+🚀 Missiles: ${userNationData?.millitary?.missiles ?? 0}
+☢️ Nukes: ${userNationData?.millitary?.nukes ?? 0}
+🕵️ Spies: ${userNationData?.millitary?.spies ?? 0}`,
+                        },
+                    ])
                     .setFooter({
                         text: `Stats by Ally: https://ally.ani.codes
 Data was last updated at ${dayjs(userNationData?.ally_last_updated).format(guildData?.config.dateFormat)}`,

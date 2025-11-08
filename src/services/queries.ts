@@ -3,6 +3,9 @@ export enum QUERIES {
         nation_name
         leader_name
         discord
+        continent
+        war_policy
+        domestic_policy
         id
         alliance_position
         alliance {
@@ -16,6 +19,12 @@ export enum QUERIES {
         cities {
             infrastructure
         }
+        soldiers
+        tanks
+        aircraft
+        ships
+        missiles
+        nukes
         `,
     GET_ALLIANCE_QUERY = `
         id

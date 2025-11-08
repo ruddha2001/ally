@@ -36,10 +36,28 @@ export interface AllyNationInterface {
     color_block?: string;
     last_active?: string;
     min_mil_req?: any;
-    spies?: number;
     num_cities?: number;
     cities?: {
         infrastructure?: number;
     }[];
+    continent?: string;
+    war_policy?: string;
+    domestic_policy?: string;
+    millitary?: {
+        soldiers?: number;
+        max_soldiers?: number;
+        tanks?: number;
+        max_tanks?: number;
+        aircrafts?: number;
+        max_aircrafts?: number;
+        ships?: number;
+        max_ships?: number;
+        missiles?: number;
+        max_missiles?: number;
+        nukes?: number;
+        max_nukes?: number;
+        spies?: number;
+        max_spies?: number;
+    };
     ally_last_updated: Date;
 }

@@ -50,9 +50,31 @@ export const parseAllianceLinkInput = (input: string | null): number | null => {
 export const getColorCircleEmoji = (color: string): string | null => {
     switch (color) {
         case 'purple':
-            return '🟣';
+            return '🟣 Purple';
         case 'black':
-            return '⚫';
+            return '⚫ Black';
+        case 'gray':
+            return '🪦 Gray';
+    }
+    return null;
+};
+
+export const mapContinentToName = (continent: string): string | null => {
+    switch (continent) {
+        case 'as':
+            return 'Asia';
+        case 'na':
+            return 'North America';
+        case 'sa':
+            return 'South America';
+        case 'an':
+            return 'Antarctica';
+        case 'eu':
+            return 'Europe';
+        case 'af':
+            return 'Africa';
+        case 'au':
+            return 'Australia';
     }
     return null;
 };

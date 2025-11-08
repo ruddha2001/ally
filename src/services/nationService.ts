@@ -27,11 +27,22 @@ const convertPnWNationToAllyNation = (pnwNation: nation): AllyNationInterface =>
         cities: pnwNation.cities?.map((city) => ({
             infrastructure: city.infrastructure as number,
         })),
-        spies: pnwNation.spies as number | undefined,
         last_active: pnwNation.last_active,
         color_block: pnwNation.color as string | undefined,
         ally_last_updated: new Date(),
         discord: pnwNation.discord as string | undefined,
+        continent: pnwNation.continent as string | undefined,
+        war_policy: pnwNation.war_policy as string | undefined,
+        domestic_policy: pnwNation.domestic_policy as string | undefined,
+        millitary: {
+            soldiers: pnwNation.soldiers as number | undefined,
+            tanks: pnwNation.tanks as number | undefined,
+            aircrafts: pnwNation.aircraft as number | undefined,
+            ships: pnwNation.ships as number | undefined,
+            missiles: pnwNation.missiles as number | undefined,
+            nukes: pnwNation.nukes as number | undefined,
+            spies: pnwNation.spies as number | undefined,
+        },
     };
     return transformedNation;
 };
