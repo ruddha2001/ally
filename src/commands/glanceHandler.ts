@@ -17,6 +17,8 @@ import { getSingleNationByNationId } from '../services/nationService.js';
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
     try {
         const { guildId, options } = command;
+        const show_everyone = options.getBoolean('show_result_to_everyone', false) ?? false;
+        await command.deferReply({ flags: show_everyone ? [] : [MessageFlags.Ephemeral] });
 
         const guildData = await getGuildDataByGuildId(guildId as string);
 
@@ -24,7 +26,6 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
             throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'glanceHandler');
         }
 
-        const show_everyone = options.getBoolean('show_result_to_everyone', false) ?? false;
         const nation_id_or_link = options.getString('nation_id_or_link', false);
         const nationIdFromManagedChannel = await getNationIdFromManagedChannelId(
             guildId as string,
@@ -49,14 +50,13 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
         const averageInfra = (totalInfra ?? 0) / (userNationData?.num_cities ?? 1);
         const lastActiveDayJs = dayjs(userNationData?.last_active as string);
 
-        await command.reply({
+        await command.editReply({
             embeds: [
                 new EmbedBuilder()
                     .setColor('Blurple')
                     .setTitle(`Here is a summary for **${userNationData?.nation_name}**`)
                     .setDescription(
-                        `🌆 Number of Cities: ${userNationData?.num_cities}
-🏗️ Average Infrastructure: ${averageInfra}`,
+                        `Leader: ${userNationData?.leader_name} [Discord: ${userNationData?.discord}]`,
                     )
                     .setFields([
                         {
@@ -67,14 +67,20 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
 🕕 Last Active: ${lastActiveDayJs.format(guildData?.config.dateFormat)} [${dayDiff(lastActiveDayJs)} ago]`,
                         },
                         {
+                            name: '🏢 **City Zoning Commission** 🏢',
+                            value: `🌆 Number of Cities: ${userNationData?.num_cities}
+🏗️ Average Infrastructure: ${averageInfra}
+🥊 MMR (Barracks/Factories/Hangars/Drydocks): ${userNationData?.min_mil_req?.totalBarracks}/${userNationData?.min_mil_req?.totalFactories}/${userNationData?.min_mil_req?.totalHangars}/${userNationData?.min_mil_req?.totalDrydocks}`,
+                        },
+                        {
                             name: `⚔️ **Millitary Zone** ⚔️`,
-                            value: `🪖 Soldiers: ${userNationData?.millitary?.soldiers ?? 0}
-💣 Tanks: ${userNationData?.millitary?.tanks ?? 0}
-🛩️ Aircrafts: ${userNationData?.millitary?.aircrafts ?? 0}
-🚢 Ships: ${userNationData?.millitary?.ships ?? 0}
-🚀 Missiles: ${userNationData?.millitary?.missiles ?? 0}
-☢️ Nukes: ${userNationData?.millitary?.nukes ?? 0}
-🕵️ Spies: ${userNationData?.millitary?.spies ?? 0}`,
+                            value: `🪖 Soldiers: ${userNationData?.millitary?.soldiers ?? 0} out of ${userNationData?.millitary?.max_soldiers ?? 0}
+💣 Tanks: ${userNationData?.millitary?.tanks ?? 0} out of ${userNationData?.millitary?.max_tanks ?? 0}
+🛩️ Aircrafts: ${userNationData?.millitary?.aircrafts ?? 0} out of ${userNationData?.millitary?.max_aircrafts ?? 0}
+🚢 Ships: ${userNationData?.millitary?.ships ?? 0} out of ${userNationData?.millitary?.max_ships ?? 0}
+🚀 Missiles: ${userNationData?.millitary?.missiles ?? 0} out of ${userNationData?.millitary?.max_missiles ?? 0}
+☢️ Nukes: ${userNationData?.millitary?.nukes ?? 0} out of ${userNationData?.millitary?.max_nukes ?? 0}
+🕵️ Spies: ${userNationData?.millitary?.spies ?? 0} out of ${userNationData?.millitary?.max_spies ?? 0}`,
                         },
                     ])
                     .setFooter({
@@ -82,7 +88,6 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
 Data was last updated at ${dayjs(userNationData?.ally_last_updated).format(guildData?.config.dateFormat)}`,
                     }),
             ],
-            flags: show_everyone ? [] : [MessageFlags.Ephemeral],
         });
     } catch (error) {
         console.error(error);

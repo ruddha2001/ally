@@ -18,6 +18,10 @@ export enum QUERIES {
         num_cities
         cities {
             infrastructure
+            barracks
+            factory
+            hangar
+            drydock
         }
         soldiers
         tanks

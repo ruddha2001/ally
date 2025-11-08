@@ -12,8 +12,11 @@ import { PnwKit } from '../lib/pnwKit.js';
 import logger from '../lib/logger.js';
 import { nation } from 'pnwkit-2.0/build/src/interfaces/queries/nation.js';
 import { QUERIES } from './queries.js';
+import { calculatePerDayAndMaxMil, calculateTotalMilImprovements } from '../shared/discordUtils.js';
 
 const convertPnWNationToAllyNation = (pnwNation: nation): AllyNationInterface => {
+    const totalMilImprovements = calculateTotalMilImprovements(pnwNation);
+    const maxAndPerDayMil = calculatePerDayAndMaxMil(totalMilImprovements);
     const transformedNation: AllyNationInterface = {
         id: Number(pnwNation.id as string),
         nation_name: pnwNation.nation_name as string | undefined,
@@ -42,7 +45,9 @@ const convertPnWNationToAllyNation = (pnwNation: nation): AllyNationInterface =>
             missiles: pnwNation.missiles as number | undefined,
             nukes: pnwNation.nukes as number | undefined,
             spies: pnwNation.spies as number | undefined,
+            ...maxAndPerDayMil,
         },
+        min_mil_req: PnwKit.getKit()?.utilities.nationMMR(pnwNation),
     };
     return transformedNation;
 };

@@ -1,5 +1,7 @@
 import dayjs, { Dayjs } from 'dayjs';
 import duration from 'dayjs/plugin/duration.js';
+import { IMPROVEMENTS } from '../../constants.js';
+import { nation } from 'pnwkit-2.0/build/src/interfaces/queries/nation.js';
 dayjs.extend(duration);
 
 const parseInputToNumericId = (input: string, type?: 'nation' | 'alliance'): number => {
@@ -92,4 +94,46 @@ export const dayDiff = (dayJsDate: Dayjs) => {
     const seconds = dur.seconds();
 
     return `${weeks}w ${days}d ${hours}h ${minutes}m ${seconds}s`;
+};
+
+export const calculatePerDayAndMaxMil = (totalMilImprovements: {
+    barracks: number;
+    factories: number;
+    hangars: number;
+    drydocks: number;
+}) => {
+    const { barracks, factories, hangars, drydocks } = totalMilImprovements;
+    const { barrack, factory, hangar, drydock, spy } = IMPROVEMENTS.millitary;
+    return {
+        max_soldiers: barrack.max * barracks,
+        per_day_soldiers: barrack.perDay * barracks,
+        max_tanks: factory.max * factories,
+        per_day_tanks: factory.perDay * factories,
+        max_aircrafts: hangar.max * hangars,
+        per_day_aircrafts: hangar.perDay * hangars,
+        max_ships: drydock.max * drydocks,
+        per_day_ships: drydock.perDay * drydocks,
+        max_spies: spy.max,
+        per_day_spies: spy.perDay,
+    };
+};
+
+export const calculateTotalMilImprovements = (nation: nation) => {
+    let totalMilImprovements = {
+        barracks: 0,
+        factories: 0,
+        hangars: 0,
+        drydocks: 0,
+    };
+
+    for (let i = 0; i < nation.cities?.length; i++) {
+        let city = nation.cities[i];
+
+        totalMilImprovements.barracks += city?.barracks ?? 0;
+        totalMilImprovements.factories += city?.factory ?? 0;
+        totalMilImprovements.hangars += city?.hangar ?? 0;
+        totalMilImprovements.drydocks += city?.drydock ?? 0;
+    }
+
+    return totalMilImprovements;
 };
