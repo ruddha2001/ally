@@ -17,7 +17,7 @@ I will be helping you manage your alliance effectively.
 Before we start, please use the command \`/ally register\` in the server to register your PnW account with me.
 
 Cheers!
-From Your Friendly Neighbourhood Alliance Management Bot 🤖
+From Your Friendly Neighborhood Alliance Management Bot 🤖
         `.trim();
         await owner.send(welcomeText);
         logger.debug(`Successfully messaged the owner of ${guild.name}.`);
