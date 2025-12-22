@@ -15,7 +15,7 @@ export enum STATIC_ERROR_CODES {
     INVALID_DISCORD = 'INVALID_DISCORD',
     INVALID_NATION_ID = 'INVALID_NATION_ID',
     SERVER_NOT_REGISTERED = 'SERVER_NOT_REGISTERED',
-    USER_NOT_PRIVILEDGED = 'USER_NOT_PRIVILEDGED',
+    USER_NOT_PRIVILEGED = 'USER_NOT_PRIVILEGED',
     USER_NOT_REGISTERED = 'USER_NOT_REGISTERED',
 }
 
@@ -29,8 +29,8 @@ export const throwStaticError = (
             throw new AllyError(
                 `Parsed Alliance ID is null, input was ${args?.alliance_id_or_link}`,
                 functionName,
-                `It seems that the Alliance ID/Link you have entered: ${args?.alliance_id_or_link} is not a valid one.
-Please retry; your nation URL will look like hhttps://politicsandwar.com/alliance/id=14196`,
+                `It seems that the Alliance ID/Link you have entered: ${args?.alliance_id_or_link ?? 'None'} is not a valid one.
+Please retry; your nation URL will look like https://politicsandwar.com/alliance/id=14196`,
             );
         case 'INVALID_DISCORD':
             throw new AllyError(
@@ -45,7 +45,7 @@ Scroll to the very bottom and update your Discord Username.`,
             throw new AllyError(
                 `Parsed Nation ID is null, input was ${args?.nation_id_or_link}`,
                 functionName,
-                `It seems that the Nation ID/Link you have entered: ${args?.nation_id_or_link} is not a valid one.
+                `It seems that the Nation ID/Link you have entered: ${args?.nation_id_or_link ?? 'None'} is not a valid one.
 Please retry; your nation URL will look like https://politicsandwar.com/nation/id=6`,
             );
         case 'SERVER_NOT_REGISTERED':
@@ -60,13 +60,13 @@ If you are the mighty Alliance Leader, please run the command \`/setup\` so that
             );
         case 'USER_NOT_REGISTERED':
             throw new AllyError(
-                `Discord user is not in databse`,
+                `Discord user is not in database`,
                 functionName,
-                `It seems that you are not registed with me.
+                `It seems that you are not registered with me.
             
 To use my services, I need to know who you are. Please run the command \`/register\` with your nation ID or link so that I can get to know you.`,
             );
-        case 'USER_NOT_PRIVILEDGED':
+        case 'USER_NOT_PRIVILEGED':
             throw new AllyError(
                 `User does not have sufficient permissions`,
                 functionName,
