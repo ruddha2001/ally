@@ -6,7 +6,7 @@ import { NationDataInterface } from '../@types/nations.js';
 
 type SupportedVerificationLevels = 'LEADER' | 'MEMBER'; // TODO: Read this from alliance info?
 
-export const verifyCommandPriviledge = async (
+export const verifyCommandPrivilege = async (
     command: ChatInputCommandInteraction,
     filter: {
         numericNationId?: number;
@@ -22,7 +22,7 @@ export const verifyCommandPriviledge = async (
     const { user } = command;
     const { discordUsername, numericNationId } = filter;
     if (!discordUsername && !numericNationId) {
-        throw new Error('No filter was passed to verifyCommandPriviledge');
+        throw new Error('No filter was passed to verifyCommandPrivilege');
     }
     if (discordUsername) {
         verificationStatus = await checkNationVerificationStatus({

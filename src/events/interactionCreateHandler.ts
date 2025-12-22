@@ -36,7 +36,7 @@ Ally button commands are meant to be used inside a Discord Server.`,
 
     if (interaction.isChatInputCommand()) {
         const command = interaction as ChatInputCommandInteraction;
-        const { guild, guildId, commandName } = command;
+        const { guild, commandName } = command;
 
         if (!guild) {
             logger.warn(`/${commandName} was run outside of a guild.`);
@@ -70,6 +70,8 @@ Ally slash commands are meant to be run inside a Discord Server.`,
                 glanceHandler(command).catch((error) => {
                     sharedInteractionErrorHandler(error, command);
                 });
+                break;
+            case 'settings':
                 break;
         }
     }

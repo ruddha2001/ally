@@ -24,4 +24,16 @@ export interface AllyGuildApplicationSettings {
     application_category_id?: string;
     membership_role?: string;
     ia_role: string;
+    audit?: {
+        audit_role_id: string;
+        audit_channel_id: string;
+        audit_levels: string[];
+        audit_mmr_slabs: Array<{
+            level: string;
+            barracks: number;
+            factories: number;
+            hangars: number;
+            drydocks: number;
+        }>;
+    };
 }

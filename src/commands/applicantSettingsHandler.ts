@@ -3,7 +3,7 @@ import { ChatInputCommandInteraction } from 'discord.js';
 import { getGuildDataByGuildId, updateGuildData } from '../services/guildService.js';
 import { ErrorResponses } from './errorResponses.js';
 import { AllyGuildDataInterface } from '../@types/guilds.js';
-import { verifyCommandPriviledge } from '../shared/verificationMiddleware.js';
+import { verifyCommandPrivilege } from '../shared/verificationMiddleware.js';
 import logger from '../lib/logger.js';
 
 export const applicantSettingsHandler = async (command: ChatInputCommandInteraction) => {
@@ -20,7 +20,7 @@ export const applicantSettingsHandler = async (command: ChatInputCommandInteract
             return await ErrorResponses.NOT_REGISTERED_ALLIANCE(command);
         }
 
-        const nationData = await verifyCommandPriviledge(
+        const nationData = await verifyCommandPrivilege(
             command,
             {
                 discordUsername: user.username,

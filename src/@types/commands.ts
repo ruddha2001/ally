@@ -4,8 +4,9 @@ export type DiscordOptionType = {
     name: string;
     description: string;
     type: ApplicationCommandOptionType;
-    required: boolean;
+    required?: boolean;
     channel_types?: ChannelType[];
+    options?: DiscordOptionType[];
 };
 
 export type DiscordCommandType = {

@@ -103,4 +103,57 @@ export const commandList: DiscordCommandType[] = [
             { name: 'show_result_to_everyone', optional: true },
         ]),
     },
+    {
+        name: 'settings',
+        description: 'Ally settings for this server',
+        options: [
+            {
+                name: 'audit',
+                description: 'Settings related to nation auditing levels',
+                type: ApplicationCommandOptionType.SubcommandGroup,
+                options: [
+                    {
+                        name: 'show',
+                        description: 'Show the current audit levels',
+                        type: ApplicationCommandOptionType.Subcommand,
+                    },
+                    {
+                        name: 'add',
+                        description: 'Add an audit level',
+                        type: ApplicationCommandOptionType.Subcommand,
+                    },
+                    {
+                        name: 'remove',
+                        description: 'Remove an audit level',
+                        type: ApplicationCommandOptionType.Subcommand,
+                    },
+                    {
+                        name: 'role',
+                        description: 'Add/update role that is allowed to execute audits',
+                        type: ApplicationCommandOptionType.Subcommand,
+                        options: [
+                            {
+                                name: 'auditRole',
+                                description:
+                                    'Users with this role will be allowed to execute alliance wide audits',
+                                type: ApplicationCommandOptionType.Role,
+                            },
+                        ],
+                    },
+                    {
+                        name: 'channel',
+                        description: 'Add/update channel where audit results are posted',
+                        type: ApplicationCommandOptionType.Subcommand,
+                        options: [
+                            {
+                                name: 'channel',
+                                description: 'Audit results will be posted in this channel',
+                                type: ApplicationCommandOptionType.Channel,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
 ];
