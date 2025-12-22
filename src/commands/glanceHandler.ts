@@ -73,14 +73,14 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
 🥊 MMR (Barracks/Factories/Hangars/Drydocks): ${userNationData?.min_mil_req?.totalBarracks}/${userNationData?.min_mil_req?.totalFactories}/${userNationData?.min_mil_req?.totalHangars}/${userNationData?.min_mil_req?.totalDrydocks}`,
                         },
                         {
-                            name: `⚔️ **Millitary Zone** ⚔️`,
-                            value: `🪖 Soldiers: ${userNationData?.millitary?.soldiers ?? 0} out of ${userNationData?.millitary?.max_soldiers ?? 0}
-💣 Tanks: ${userNationData?.millitary?.tanks ?? 0} out of ${userNationData?.millitary?.max_tanks ?? 0}
-🛩️ Aircrafts: ${userNationData?.millitary?.aircrafts ?? 0} out of ${userNationData?.millitary?.max_aircrafts ?? 0}
-🚢 Ships: ${userNationData?.millitary?.ships ?? 0} out of ${userNationData?.millitary?.max_ships ?? 0}
-🚀 Missiles: ${userNationData?.millitary?.missiles ?? 0} out of ${userNationData?.millitary?.max_missiles ?? 0}
-☢️ Nukes: ${userNationData?.millitary?.nukes ?? 0} out of ${userNationData?.millitary?.max_nukes ?? 0}
-🕵️ Spies: ${userNationData?.millitary?.spies ?? 0} out of ${userNationData?.millitary?.max_spies ?? 0}`,
+                            name: `⚔️ **military Zone** ⚔️`,
+                            value: `🪖 Soldiers: ${userNationData?.military?.soldiers ?? 0} out of ${userNationData?.military?.max_soldiers ?? 0}
+💣 Tanks: ${userNationData?.military?.tanks ?? 0} out of ${userNationData?.military?.max_tanks ?? 0}
+🛩️ Aircrafts: ${userNationData?.military?.aircrafts ?? 0} out of ${userNationData?.military?.max_aircrafts ?? 0}
+🚢 Ships: ${userNationData?.military?.ships ?? 0} out of ${userNationData?.military?.max_ships ?? 0}
+🚀 Missiles: ${userNationData?.military?.missiles ?? 0} out of ${userNationData?.military?.max_missiles ?? 0}
+☢️ Nukes: ${userNationData?.military?.nukes ?? 0} out of ${userNationData?.military?.max_nukes ?? 0}
+🕵️ Spies: ${userNationData?.military?.spies ?? 0} out of ${userNationData?.military?.max_spies ?? 0}`,
                         },
                     ])
                     .setFooter({

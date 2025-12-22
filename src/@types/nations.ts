@@ -1,5 +1,3 @@
-import {} from 'pnwkit-2.0';
-import { PnwKit } from '../lib/pnwKit.js';
 import { MMR } from 'pnwkit-2.0/build/src/interfaces/data/war.js';
 
 export interface NationDataInterface {
@@ -44,7 +42,7 @@ export interface AllyNationInterface {
     continent?: string;
     war_policy?: string;
     domestic_policy?: string;
-    millitary?: {
+    military?: {
         soldiers?: number;
         max_soldiers?: number;
         per_day_soldiers?: number;
