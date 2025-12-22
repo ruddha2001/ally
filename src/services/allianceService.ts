@@ -33,7 +33,7 @@ const convertPnWAllianceToAllyAlliance = (pnwAlliance: alliance): AllyAllianceIn
 };
 
 export const updateAllianceData = async (alliance: AllyAllianceInterface) => {
-    await (await Database.getDatabse()).collection('alliances').updateOne(
+    await (await Database.getDatabase()).collection('alliances').updateOne(
         {
             id: alliance.id,
         },
@@ -48,7 +48,7 @@ export const updateAllianceData = async (alliance: AllyAllianceInterface) => {
 
 export const getAllianceById = async (allianceId: string, validity: number = 5) => {
     logger.debug(`[getAllianceById] Start | Alliance ID: ${allianceId}`);
-    let finalAllianceObject = await (await Database.getDatabse())
+    let finalAllianceObject = await (await Database.getDatabase())
         .collection('alliances')
         .findOne<AllyAllianceInterface>({
             id: allianceId,

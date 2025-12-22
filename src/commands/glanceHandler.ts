@@ -17,7 +17,7 @@ import { getSingleNationByNationId } from '../services/nationService.js';
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
     try {
         const { guildId, options } = command;
-        const show_everyone = options.getBoolean('show_result_to_everyone', false) ?? false;
+        const show_everyone = options.getBoolean('show_result_to_everyone', false) ?? true;
         await command.deferReply({ flags: show_everyone ? [] : [MessageFlags.Ephemeral] });
 
         const guildData = await getGuildDataByGuildId(guildId as string);

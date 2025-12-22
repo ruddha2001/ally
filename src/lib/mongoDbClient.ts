@@ -43,7 +43,7 @@ export class Database {
      */
     static async connectClient() {
         await (await Database.getClient()).connect();
-        logger.info('Databse connection is successful');
+        logger.info('Database connection is successful');
     }
 
     /**
@@ -51,7 +51,7 @@ export class Database {
      *
      * @returns {Promise<Db>} The MongoDB database instance.
      */
-    static async getDatabse(): Promise<Db> {
+    static async getDatabase(): Promise<Db> {
         return (await Database.getClient()).db('ally');
     }
 

@@ -37,7 +37,7 @@ const convertPnWNationToAllyNation = (pnwNation: nation): AllyNationInterface =>
         continent: pnwNation.continent as string | undefined,
         war_policy: pnwNation.war_policy as string | undefined,
         domestic_policy: pnwNation.domestic_policy as string | undefined,
-        millitary: {
+        military: {
             soldiers: pnwNation.soldiers as number | undefined,
             tanks: pnwNation.tanks as number | undefined,
             aircrafts: pnwNation.aircraft as number | undefined,
@@ -58,7 +58,7 @@ const convertPnWNationToAllyNation = (pnwNation: nation): AllyNationInterface =>
  * @returns Nation data
  */
 export const getNationData = async (nationId: number): Promise<NationDataInterface | null> => {
-    const resultFromDb = await (await Database.getDatabse())
+    const resultFromDb = await (await Database.getDatabase())
         .collection('nationsDynamic')
         .findOne<NationDataInterface>({ nation_id: nationId });
     if (resultFromDb) {
@@ -104,7 +104,7 @@ export const checkNationVerificationStatus = async (filter: {
     nation_id?: number;
     discord_username?: string;
 }): Promise<{ status: boolean; expired: boolean; nationId: number | null }> => {
-    const result = await (await Database.getDatabse())
+    const result = await (await Database.getDatabase())
         .collection('nationsStatic')
         .findOne<StaticNationDataInterface>(filter);
     if (!result) {
@@ -128,8 +128,8 @@ export const checkNationVerificationStatus = async (filter: {
     };
 };
 
-export const updateSingleNationData = async (nation: AllyNationInterface) => {
-    await (await Database.getDatabse()).collection('nations').updateOne(
+const updateSingleNationData = async (nation: AllyNationInterface) => {
+    await (await Database.getDatabase()).collection('nations').updateOne(
         {
             id: nation.id,
         },
@@ -149,7 +149,7 @@ export const getSingleNationDataByDiscordUsername = async (
     logger.debug(
         `[getSingleNationDataByDiscordUsername] Start | Discord username: ${discordUsername}`,
     );
-    let finalNationObject = await (await Database.getDatabse())
+    let finalNationObject = await (await Database.getDatabase())
         .collection('nations')
         .findOne<AllyNationInterface>({
             discord: discordUsername,
@@ -206,7 +206,7 @@ export const getSingleNationByNationId = async (
     logger.debug(`[getSingleNationByNationId] Start | Nation ID: ${nationId}`);
     let finalNationObject: AllyNationInterface | null = null;
     if (!skipCache) {
-        finalNationObject = await (await Database.getDatabse())
+        finalNationObject = await (await Database.getDatabase())
             .collection('nations')
             .findOne<AllyNationInterface>({
                 id: nationId,

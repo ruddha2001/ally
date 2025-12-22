@@ -2,13 +2,13 @@ import { AllyGuildDataInterface } from '../@types/guilds.js';
 import { Database } from '../lib/mongoDbClient.js';
 
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
-    await (await Database.getDatabse())
+    await (await Database.getDatabase())
         .collection('guilds')
         .updateOne({ guild_id: guildData.guild_id }, { $set: guildData }, { upsert: true });
 };
 
 export const getGuildDataByGuildId = async (guildId: string) => {
-    return await (await Database.getDatabse())
+    return await (await Database.getDatabase())
         .collection('guilds')
         .findOne<AllyGuildDataInterface>({ guild_id: guildId });
 };
