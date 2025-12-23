@@ -3,15 +3,14 @@ import {
     APIEmbedField,
     ChatInputCommandInteraction,
     EmbedBuilder,
-    MessageFlags,
     ModalBuilder,
     ModalSubmitInteraction,
     TextInputBuilder,
     TextInputStyle,
 } from 'discord.js';
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
-import { getGuildDataByGuildId } from '../services/guildService.js';
-import { AllyGuildDataInterface } from '../@types/guilds.js';
+import { addAuditLevel, getGuildDataByGuildId } from '../services/guildService.js';
+import { AllyGuildAuditLevel, AllyGuildDataInterface } from '../@types/guilds.js';
 import logger from '../lib/logger.js';
 
 const auditShowHandler = async (command: ChatInputCommandInteraction) => {
@@ -26,13 +25,11 @@ const auditShowHandler = async (command: ChatInputCommandInteraction) => {
     const { application_settings, alliance_name } = guildData as AllyGuildDataInterface;
     const auditSettings = application_settings?.audit;
 
-    const embedFieldMap: Array<APIEmbedField> | undefined = auditSettings?.audit_levels
-        ?.map((level: string) => {
-            const mmrSlab = auditSettings.audit_mmr_slabs.find((slab) => slab.level === level);
+    const embedFieldMap: Array<APIEmbedField> | undefined = auditSettings?.audit_mmr_slabs
+        ?.map((mmrSlab) => {
             return {
                 name: `⚆ ${mmrSlab?.name}`,
-                value: `ID: ${mmrSlab?.level}
-City Range (inclusive): ${mmrSlab?.min_city} to ${mmrSlab?.max_city}
+                value: `City Range (inclusive): ${mmrSlab?.min_city} to ${mmrSlab?.max_city}
 MMR (Barrack/Factory/Hangar/Drydocks): ${mmrSlab?.barracks}/${mmrSlab?.factories}/${mmrSlab?.hangars}/${mmrSlab?.drydocks}`,
             };
         })
@@ -113,9 +110,50 @@ const auditAddHandler = async (command: ChatInputCommandInteraction) => {
 
         if (submission) {
             const levelName = submission.fields.getTextInputValue('levelName');
+            const cityMin = submission.fields.getTextInputValue('cityMin');
+            const cityMax = submission.fields.getTextInputValue('cityMax');
+            const mmr = submission.fields.getTextInputValue('mmrCombined');
+            const mmrSplit = [...mmr];
+
+            try {
+                const levelData: AllyGuildAuditLevel = {
+                    name: levelName,
+                    max_city: parseInt(cityMax, 10),
+                    min_city: parseInt(cityMin, 10),
+                    barracks: parseInt(mmrSplit[0], 10),
+                    factories: parseInt(mmrSplit[1], 10),
+                    hangars: parseInt(mmrSplit[2], 10),
+                    drydocks: parseInt(mmrSplit[3], 10),
+                };
+
+                await addAuditLevel(command.guildId as string, levelData);
+            } catch (error) {
+                logger.debug(error);
+                await submission.reply({
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor('Red')
+                            .setTitle('Could not add a new level')
+                            .setDescription(
+                                'There was an error when I was trying to add a new audit level',
+                            ),
+                    ],
+                });
+                return;
+            }
 
             await submission.reply({
-                content: `✅ A new level named ${levelName} has been added.`,
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('Green')
+                        .setTitle(`Added a new level: ${levelName}`)
+                        .setDescription(
+                            'You have successfully added a new level with the following details',
+                        )
+                        .setFooter({
+                            text: `Powered by Ally: https://ally.ani.codes`,
+                        }),
+                ],
             });
         }
     } catch (err) {

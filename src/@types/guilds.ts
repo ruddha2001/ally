@@ -27,16 +27,17 @@ export interface AllyGuildApplicationSettings {
     audit?: {
         audit_role_id: string;
         audit_channel_id: string;
-        audit_levels: string[];
-        audit_mmr_slabs: Array<{
-            level: string;
-            name: string;
-            barracks: number;
-            factories: number;
-            hangars: number;
-            drydocks: number;
-            min_city: number;
-            max_city: number;
-        }>;
+        audit_mmr_slabs: Array<AllyGuildAuditLevel>;
     };
+}
+
+export interface AllyGuildAuditLevel {
+    label?: string;
+    name: string;
+    barracks: number;
+    factories: number;
+    hangars: number;
+    drydocks: number;
+    min_city: number;
+    max_city: number;
 }
