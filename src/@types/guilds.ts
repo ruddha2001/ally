@@ -30,6 +30,7 @@ export interface AllyGuildApplicationSettings {
         audit_levels: string[];
         audit_mmr_slabs: Array<{
             level: string;
+            name: string;
             barracks: number;
             factories: number;
             hangars: number;

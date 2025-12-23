@@ -16,7 +16,7 @@ import { getSingleNationByNationId } from '../services/nationService.js';
 
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
     try {
-        const { guildId, options } = command;
+        const { guildId, options, channelId } = command;
         const show_everyone = options.getBoolean('show_result_to_everyone', false) ?? true;
         await command.deferReply({ flags: show_everyone ? [] : [MessageFlags.Ephemeral] });
 
@@ -29,7 +29,7 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
         const nation_id_or_link = options.getString('nation_id_or_link', false);
         const nationIdFromManagedChannel = await getNationIdFromManagedChannelId(
             guildId as string,
-            command.channelId as string,
+            channelId as string,
         );
         const nationId = parseNationLinkInput(nation_id_or_link ?? nationIdFromManagedChannel);
 
