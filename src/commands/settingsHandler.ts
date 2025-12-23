@@ -21,12 +21,11 @@ const auditShowHandler = async (command: ChatInputCommandInteraction) => {
             return {
                 name: `⚆ ${mmrSlab?.name}`,
                 value: `ID: ${mmrSlab?.level}
+City Range (inclusive): ${mmrSlab?.min_city} to ${mmrSlab?.max_city}
 MMR (Barrack/Factory/Hangar/Drydocks): ${mmrSlab?.barracks}/${mmrSlab?.factories}/${mmrSlab?.hangars}/${mmrSlab?.drydocks}`,
             };
         })
         .filter(Boolean);
-
-    console.log(embedFieldMap);
 
     await command.editReply({
         embeds: [

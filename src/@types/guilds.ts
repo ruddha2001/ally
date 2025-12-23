@@ -35,6 +35,8 @@ export interface AllyGuildApplicationSettings {
             factories: number;
             hangars: number;
             drydocks: number;
+            min_city: number;
+            max_city: number;
         }>;
     };
 }
