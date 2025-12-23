@@ -1,7 +1,18 @@
-import { APIEmbedField, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import {
+    ActionRowBuilder,
+    APIEmbedField,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    MessageFlags,
+    ModalBuilder,
+    ModalSubmitInteraction,
+    TextInputBuilder,
+    TextInputStyle,
+} from 'discord.js';
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
 import { getGuildDataByGuildId } from '../services/guildService.js';
 import { AllyGuildDataInterface } from '../@types/guilds.js';
+import logger from '../lib/logger.js';
 
 const auditShowHandler = async (command: ChatInputCommandInteraction) => {
     const { guildId, guild } = command;
@@ -52,16 +63,81 @@ MMR (Barrack/Factory/Hangar/Drydocks): ${mmrSlab?.barracks}/${mmrSlab?.factories
     });
 };
 
+const auditAddHandler = async (command: ChatInputCommandInteraction) => {
+    const modal = new ModalBuilder()
+        .setCustomId('newAuditLevelModal')
+        .setTitle('Add a new Audit Level');
+
+    const levelNameInput = new TextInputBuilder()
+        .setCustomId('levelName')
+        .setLabel('What are you naming this Level?')
+        .setPlaceholder('Some Crazy Name')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const cityMinInput = new TextInputBuilder()
+        .setCustomId('cityMin')
+        .setLabel('Lowest City Count for this level (inclusive)')
+        .setPlaceholder('0')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const cityMaxInput = new TextInputBuilder()
+        .setCustomId('cityMax')
+        .setLabel('Highest City Count for this level (inclusive)')
+        .setPlaceholder('100')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const mmrInput = new TextInputBuilder()
+        .setCustomId('mmrCombined')
+        .setLabel('MMR (B F H D) without any spaces or slash')
+        .setPlaceholder('1024')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    modal.addComponents(
+        new ActionRowBuilder<TextInputBuilder>().addComponents(levelNameInput),
+        new ActionRowBuilder<TextInputBuilder>().addComponents(cityMinInput),
+        new ActionRowBuilder<TextInputBuilder>().addComponents(cityMaxInput),
+        new ActionRowBuilder<TextInputBuilder>().addComponents(mmrInput),
+    );
+
+    await command.showModal(modal);
+
+    try {
+        const filter = (i: ModalSubmitInteraction) =>
+            i.customId === 'newAuditLevelModal' && i.user.id === command.user.id;
+
+        const submission = await command.awaitModalSubmit({ filter, time: 120_000 });
+
+        if (submission) {
+            const levelName = submission.fields.getTextInputValue('levelName');
+
+            await submission.reply({
+                content: `✅ A new level named ${levelName} has been added.`,
+            });
+        }
+    } catch (err) {
+        logger.error(
+            `Submission time limit expired for newAuditLevelModal initiated by user ${command.user.displayName} in ${command.guild?.name}`,
+        );
+    }
+};
+
 export const settingsHandler = async (command: ChatInputCommandInteraction) => {
     try {
-        await command.deferReply();
         const group = command.options.getSubcommandGroup();
         const subcommand = command.options.getSubcommand();
 
         if (group === 'audit') {
             switch (subcommand) {
                 case 'show':
+                    await command.deferReply();
                     await auditShowHandler(command);
+                    break;
+                case 'add':
+                    await auditAddHandler(command);
                     break;
             }
         }
