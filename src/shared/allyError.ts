@@ -1,6 +1,12 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import logger from '../lib/logger.js';
 
+/**
+ * Custom error type used across the bot to attach a user-facing description to an error.
+ *
+ * The `message` is prefixed with `[functionName]` for easier tracing in logs, while
+ * `description` is intended to be shown to the end user (e.g., in a Discord embed).
+ */
 export class AllyError extends Error {
     description?: string;
     constructor(message: string, functionName: string, description?: string) {

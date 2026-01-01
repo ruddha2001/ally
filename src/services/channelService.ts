@@ -1,6 +1,7 @@
-import { Guild, GuildBasedChannel, GuildMember } from 'discord.js';
+import { ChannelType, Guild, GuildBasedChannel, GuildMember } from 'discord.js';
 import { validChannelTypes } from '../@types/channels.js';
 import { getGuildDataByGuildId } from './guildService.js';
+import { AllyError } from '../shared/allyError.js';
 
 /**
  * Find a guild channel by name using Discord-style "slug" normalization.
@@ -20,6 +21,22 @@ export const findChannelByName = (
     guild.channels.cache.find(
         (channel) => channel.name === channelName.toLowerCase().replace(/\s+/g, '-'),
     );
+
+/**
+ * Fetches a guild channel by its Snowflake ID.
+ *
+ * This uses Discord.js `guild.channels.fetch`, which may perform an API request if the channel
+ * is not present in cache and will resolve to `null` when the channel cannot be found or
+ * is inaccessible to the bot.
+ *
+ * @param guild - The Discord guild used to fetch the channel.
+ * @param channelId - The Snowflake ID of the channel to fetch.
+ * @returns A promise that resolves to the fetched {@link GuildBasedChannel}, or `null` if not found.
+ */
+export const findChannelById = async (
+    guild: Guild,
+    channelId: string,
+): Promise<GuildBasedChannel | null> => await guild.channels.fetch(channelId);
 
 /**
  * Marks an applicant's channel as verified by optionally renaming the channel, assigning the verified role
@@ -78,4 +95,32 @@ Now our ${iaRole} will help you get started with the next phase of your onboardi
             }
         }
     } catch {}
+};
+
+/**
+ * Renames a guild text channel to the provided name.
+ *
+ * @remarks
+ * This helper only supports {@link ChannelType.GuildText}. If the provided channel is `null`
+ * or is not a guild text channel, it throws an {@link AllyError}.
+ *
+ * @param channel - The channel to rename. Must be a non-null guild text channel.
+ * @param newChannelName - The new name to apply to the channel.
+ * @returns A promise that resolves when the channel has been renamed.
+ *
+ * @throws {@link AllyError} Thrown when `channel` is `null` or is not a guild text channel.
+ */
+export const renameChannel = async (
+    channel: GuildBasedChannel | null,
+    newChannelName: string,
+): Promise<void> => {
+    if (!channel || channel.type !== ChannelType.GuildText) {
+        throw new AllyError(
+            'Expected a text based channel to rename',
+            'channelService',
+            'I was expecting to rename this channel, but it is not the right type of channel.',
+        );
+    }
+
+    await channel.setName(newChannelName);
 };

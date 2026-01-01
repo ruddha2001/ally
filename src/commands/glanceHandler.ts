@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, Guild, MessageFlags } from 'discord.js';
 import dayjs from 'dayjs';
 
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
@@ -13,16 +13,17 @@ import {
     parseNationLinkInput,
 } from '../shared/discordUtils.js';
 import { getSingleNationByNationId } from '../services/nationService.js';
+import { findChannelById, renameChannel } from '../services/channelService.js';
 
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
     try {
-        const { guildId, options, channelId } = command;
+        const { guild, guildId, options, channelId } = command;
         const show_everyone = options.getBoolean('show_result_to_everyone', false) ?? true;
         await command.deferReply({ flags: show_everyone ? [] : [MessageFlags.Ephemeral] });
 
         const guildData = await getGuildDataByGuildId(guildId as string);
 
-        if (!guildData) {
+        if (!guildData || !guild) {
             throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'glanceHandler');
         }
 
@@ -89,6 +90,15 @@ Data was last updated at ${dayjs(userNationData?.ally_last_updated).format(guild
                     }),
             ],
         });
+
+        const channel = await findChannelById(guild as Guild, channelId);
+        const currentNamedCityCount = parseInt(channel?.name?.split('|')[0]?.trim() ?? '0', 10);
+        if (currentNamedCityCount !== userNationData?.num_cities) {
+            await renameChannel(
+                channel,
+                `${userNationData?.num_cities ?? 0} | ${userNationData?.nation_name}`,
+            );
+        }
     } catch (error) {
         console.error(error);
         if (error instanceof AllyError) {
