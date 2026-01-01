@@ -15,6 +15,30 @@ import {
 import { getSingleNationByNationId } from '../services/nationService.js';
 import { findChannelById, renameChannel } from '../services/channelService.js';
 
+/**
+ * Handles the `/glance` command by fetching and presenting a quick summary of a Politics & War nation.
+ *
+ * The handler:
+ * - Defers the interaction reply, optionally making it ephemeral based on the `show_result_to_everyone` option.
+ * - Validates that the current Discord guild is registered in Ally (via `getGuildDataByGuildId`).
+ * - Determines the target nation ID either from:
+ *   - the `nation_id_or_link` option, or
+ *   - the nation mapped to the current managed channel (via `getNationIdFromManagedChannelId`),
+ *   then parses it using `parseNationLinkInput`.
+ * - Fetches nation stats via `getSingleNationByNationId`, computes total and average infrastructure, and formats
+ *   last-active timestamps using the guild-configured date format.
+ * - Edits the deferred reply with an embed containing general, city, and military details.
+ * - Renames the current channel to match the nation's city count and name if the channel is managed and the
+ *   city count in the channel name is out of date.
+ *
+ * @param command - The Discord slash command interaction.
+ *
+ * @throws {@link AllyError}
+ * Thrown when:
+ * - the server is not registered (`SERVER_NOT_REGISTERED`),
+ * - the nation ID/link is invalid (`INVALID_NATION_ID`),
+ * - or an unexpected error occurs (wrapped as a generic `AllyError`).
+ */
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
     try {
         const { guild, guildId, options, channelId } = command;
@@ -96,7 +120,7 @@ Data was last updated at ${dayjs(userNationData?.ally_last_updated).format(guild
         if (currentNamedCityCount !== userNationData?.num_cities) {
             await renameChannel(
                 channel,
-                `${userNationData?.num_cities ?? 0} | ${userNationData?.nation_name}`,
+                `${userNationData?.num_cities ?? 0} - ${userNationData?.nation_name}`,
             );
         }
     } catch (error) {
