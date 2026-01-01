@@ -2,6 +2,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import duration from 'dayjs/plugin/duration.js';
 import { IMPROVEMENTS } from '../../constants.js';
 import { nation } from 'pnwkit-2.0/build/src/interfaces/queries/nation.js';
+import { EmbedBuilder } from 'discord.js';
 dayjs.extend(duration);
 
 const parseInputToNumericId = (input: string, type?: 'nation' | 'alliance'): number => {
@@ -136,4 +137,9 @@ export const calculateTotalMilImprovements = (nation: nation) => {
     }
 
     return totalMilImprovements;
+};
+
+export const allyEmbedBuilder = (): EmbedBuilder => {
+    const embed = new EmbedBuilder();
+    return embed;
 };
