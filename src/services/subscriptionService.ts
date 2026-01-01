@@ -5,6 +5,7 @@ import {
 import { PnwKit } from '../lib/pnwKit.js';
 import { city } from 'pnwkit-2.0/build/src/interfaces/queries/city.js';
 import logger from '../lib/logger.js';
+import { getAllAllianceIds } from './guildService.js';
 
 const inMemoryChannelMap: Map<subscriptionModel, Map<subscriptionEvent, string>> = new Map<
     subscriptionModel,
@@ -14,13 +15,16 @@ const SupportedSubscriptionList = [subscriptionModel.CITY];
 const processSubscriptionChannels = async (
     opType: subscriptionEvent = subscriptionEvent.CREATE,
 ) => {
+    const all_alliance_ids = await getAllAllianceIds();
     for (const model of SupportedSubscriptionList) {
         for (const event of [
             subscriptionEvent.CREATE,
             subscriptionEvent.UPDATE,
             subscriptionEvent.DELETE,
         ]) {
-            const channel = await PnwKit.getKit()?.subscriptionChannel(model, opType);
+            const channel = await PnwKit.getKit()?.subscriptionChannel(model, opType, {
+                alliance_id: all_alliance_ids,
+            });
             if (channel) {
                 if (!inMemoryChannelMap.has(model)) {
                     inMemoryChannelMap.set(model, new Map<subscriptionEvent, string>());

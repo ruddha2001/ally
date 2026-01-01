@@ -74,13 +74,13 @@ const initApp = async () => {
         attachEventListeners();
         await Database.connectClient();
         PnwKit.initKit(process.env.PNW_API_KEY as string);
+        await subscribe();
         DiscordGatewayClient.getClient().login(process.env.DISCORD_TOKEN);
         DiscordRestClient.registerCommands(
             process.env.DISCORD_TOKEN as string,
             process.env.DISCORD_CLIENT_ID as string,
             process.env.DISCORD_TEST_GUILD_ID as string,
         );
-        await subscribe();
     } catch (error) {
         console.error(
             'Unhandled error for server initialization - Gracefully shutting down',

@@ -1,4 +1,6 @@
+import { CACHE_KEYS } from '../../constants.js';
 import { AllyGuildAuditLevel, AllyGuildDataInterface } from '../@types/guilds.js';
+import { Cache } from '../lib/cache.js';
 import { Database } from '../lib/mongoDbClient.js';
 
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
@@ -62,4 +64,21 @@ export const addAuditLevel = async (guildId: string, levelData: AllyGuildAuditLe
     }
 
     await updateGuildData(guildData);
+};
+
+export const getAllAllianceIds = async (): Promise<number[]> => {
+    const keys = await Cache.getCache().get<number[]>(CACHE_KEYS.ALL_ALLIANCE_IDS);
+    if (keys) {
+        return keys;
+    }
+
+    const allianceIds: string[] = await (await Database.getDatabase())
+        .collection('guilds')
+        .distinct('alliance_id', {
+            alliance_id: { $exists: true, $ne: null },
+        });
+
+    await Cache.getCache().set(CACHE_KEYS.ALL_ALLIANCE_IDS, allianceIds, 1 * 60 * 60 * 1000);
+
+    return allianceIds.map((id) => parseInt(id, 10));
 };
