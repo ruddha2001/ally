@@ -73,7 +73,7 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
 🥊 MMR (Barracks/Factories/Hangars/Drydocks): ${userNationData?.min_mil_req?.totalBarracks}/${userNationData?.min_mil_req?.totalFactories}/${userNationData?.min_mil_req?.totalHangars}/${userNationData?.min_mil_req?.totalDrydocks}`,
                         },
                         {
-                            name: `⚔️ **military Zone** ⚔️`,
+                            name: `⚔️ **Military Zone** ⚔️`,
                             value: `🪖 Soldiers: ${userNationData?.military?.soldiers ?? 0} out of ${userNationData?.military?.max_soldiers ?? 0}
 💣 Tanks: ${userNationData?.military?.tanks ?? 0} out of ${userNationData?.military?.max_tanks ?? 0}
 🛩️ Aircrafts: ${userNationData?.military?.aircrafts ?? 0} out of ${userNationData?.military?.max_aircrafts ?? 0}
