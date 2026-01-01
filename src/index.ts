@@ -60,6 +60,7 @@ import { DiscordRestClient } from './lib/restClient.js';
 import { Database } from './lib/mongoDbClient.js';
 import { PnwKit } from './lib/pnwKit.js';
 import { attachEventListeners } from './events/index.js';
+import { subscribe, unsubscribe } from './services/subscriptionService.js';
 
 const initApp = async () => {
     console.log(`Starting process on PID ${process.pid}. Check winston log files for all logs.`);
@@ -79,6 +80,7 @@ const initApp = async () => {
             process.env.DISCORD_CLIENT_ID as string,
             process.env.DISCORD_TEST_GUILD_ID as string,
         );
+        await subscribe();
     } catch (error) {
         console.error(
             'Unhandled error for server initialization - Gracefully shutting down',
@@ -95,7 +97,16 @@ const shutdown = () => {
         })
         .finally(() => {
             console.log(`Shutdown complete. Exiting process with PID ${process.pid}`);
-            process.exit(0);
+            unsubscribe()
+                .catch((subscriptionError) => {
+                    console.error(
+                        'Encountered an error when trying to close the subscriptions',
+                        subscriptionError,
+                    );
+                })
+                .finally(() => {
+                    process.exit(0);
+                });
         });
 };
 

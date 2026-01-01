@@ -116,7 +116,7 @@ Data was last updated at ${dayjs(userNationData?.ally_last_updated).format(guild
         });
 
         const channel = await findChannelById(guild as Guild, channelId);
-        const currentNamedCityCount = parseInt(channel?.name?.split('|')[0]?.trim() ?? '0', 10);
+        const currentNamedCityCount = parseInt(channel?.name?.split('-')[0]?.trim() ?? '0', 10);
         if (currentNamedCityCount !== userNationData?.num_cities) {
             await renameChannel(
                 channel,
