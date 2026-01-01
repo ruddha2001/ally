@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, Guild, MessageFlags } from 'discord.js';
 import dayjs from 'dayjs';
 
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
@@ -13,23 +13,48 @@ import {
     parseNationLinkInput,
 } from '../shared/discordUtils.js';
 import { getSingleNationByNationId } from '../services/nationService.js';
+import { findChannelById, renameChannel } from '../services/channelService.js';
 
+/**
+ * Handles the `/glance` command by fetching and presenting a quick summary of a Politics & War nation.
+ *
+ * The handler:
+ * - Defers the interaction reply, optionally making it ephemeral based on the `show_result_to_everyone` option.
+ * - Validates that the current Discord guild is registered in Ally (via `getGuildDataByGuildId`).
+ * - Determines the target nation ID either from:
+ *   - the `nation_id_or_link` option, or
+ *   - the nation mapped to the current managed channel (via `getNationIdFromManagedChannelId`),
+ *   then parses it using `parseNationLinkInput`.
+ * - Fetches nation stats via `getSingleNationByNationId`, computes total and average infrastructure, and formats
+ *   last-active timestamps using the guild-configured date format.
+ * - Edits the deferred reply with an embed containing general, city, and military details.
+ * - Renames the current channel to match the nation's city count and name if the channel is managed and the
+ *   city count in the channel name is out of date.
+ *
+ * @param command - The Discord slash command interaction.
+ *
+ * @throws {@link AllyError}
+ * Thrown when:
+ * - the server is not registered (`SERVER_NOT_REGISTERED`),
+ * - the nation ID/link is invalid (`INVALID_NATION_ID`),
+ * - or an unexpected error occurs (wrapped as a generic `AllyError`).
+ */
 export const glanceHandler = async (command: ChatInputCommandInteraction) => {
     try {
-        const { guildId, options } = command;
+        const { guild, guildId, options, channelId } = command;
         const show_everyone = options.getBoolean('show_result_to_everyone', false) ?? true;
         await command.deferReply({ flags: show_everyone ? [] : [MessageFlags.Ephemeral] });
 
         const guildData = await getGuildDataByGuildId(guildId as string);
 
-        if (!guildData) {
+        if (!guildData || !guild) {
             throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'glanceHandler');
         }
 
         const nation_id_or_link = options.getString('nation_id_or_link', false);
         const nationIdFromManagedChannel = await getNationIdFromManagedChannelId(
             guildId as string,
-            command.channelId as string,
+            channelId as string,
         );
         const nationId = parseNationLinkInput(nation_id_or_link ?? nationIdFromManagedChannel);
 
@@ -73,7 +98,7 @@ export const glanceHandler = async (command: ChatInputCommandInteraction) => {
 🥊 MMR (Barracks/Factories/Hangars/Drydocks): ${userNationData?.min_mil_req?.totalBarracks}/${userNationData?.min_mil_req?.totalFactories}/${userNationData?.min_mil_req?.totalHangars}/${userNationData?.min_mil_req?.totalDrydocks}`,
                         },
                         {
-                            name: `⚔️ **military Zone** ⚔️`,
+                            name: `⚔️ **Military Zone** ⚔️`,
                             value: `🪖 Soldiers: ${userNationData?.military?.soldiers ?? 0} out of ${userNationData?.military?.max_soldiers ?? 0}
 💣 Tanks: ${userNationData?.military?.tanks ?? 0} out of ${userNationData?.military?.max_tanks ?? 0}
 🛩️ Aircrafts: ${userNationData?.military?.aircrafts ?? 0} out of ${userNationData?.military?.max_aircrafts ?? 0}
@@ -89,6 +114,15 @@ Data was last updated at ${dayjs(userNationData?.ally_last_updated).format(guild
                     }),
             ],
         });
+
+        const channel = await findChannelById(guild as Guild, channelId);
+        const currentNamedCityCount = parseInt(channel?.name?.split('-')[0]?.trim() ?? '0', 10);
+        if (currentNamedCityCount !== userNationData?.num_cities) {
+            await renameChannel(
+                channel,
+                `${userNationData?.num_cities ?? 0} - ${userNationData?.nation_name}`,
+            );
+        }
     } catch (error) {
         console.error(error);
         if (error instanceof AllyError) {

@@ -1,6 +1,6 @@
 {
     "name": "ally",
-    "version": "1.4.2-alpha",
+    "version": "1.5.0-alpha",
     "main": "src/index.ts",
     "scripts": {
         "start": "tsx src/index.ts",
@@ -37,6 +37,7 @@
         "discord.js": "^14.23.2",
         "dotenv": "^17.2.3",
         "graphql": "^16.11.0",
+        "keyv": "^5.5.5",
         "mongodb": "^6.20.0",
         "pnwkit-2.0": "^1.5.50",
         "winston": "^3.18.3"

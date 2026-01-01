@@ -30,3 +30,7 @@ export const IMPROVEMENTS = {
         },
     },
 };
+
+export const CACHE_KEYS = {
+    ALL_ALLIANCE_IDS: 'all_alliance_ids',
+};

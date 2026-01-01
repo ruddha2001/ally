@@ -127,31 +127,31 @@ export const commandList: DiscordCommandType[] = [
                         description: 'Remove an audit level',
                         type: ApplicationCommandOptionType.Subcommand,
                     },
-                    // {
-                    //     name: 'role',
-                    //     description: 'Add/update role that is allowed to execute audits',
-                    //     type: ApplicationCommandOptionType.Subcommand,
-                    //     options: [
-                    //         {
-                    //             name: 'auditRole',
-                    //             description:
-                    //                 'Users with this role will be allowed to execute alliance wide audits',
-                    //             type: ApplicationCommandOptionType.Role,
-                    //         },
-                    //     ],
-                    // },
-                    // {
-                    //     name: 'channel',
-                    //     description: 'Add/update channel where audit results are posted',
-                    //     type: ApplicationCommandOptionType.Subcommand,
-                    //     options: [
-                    //         {
-                    //             name: 'channelName',
-                    //             description: 'Audit results will be posted in this channel',
-                    //             type: ApplicationCommandOptionType.Channel,
-                    //         },
-                    //     ],
-                    // },
+                    {
+                        name: 'role',
+                        description: 'Add/update role that is allowed to execute audits',
+                        type: ApplicationCommandOptionType.Subcommand,
+                        options: [
+                            {
+                                name: 'audit_role',
+                                description:
+                                    'Users with this role will be allowed to execute alliance wide audits',
+                                type: ApplicationCommandOptionType.Role,
+                            },
+                        ],
+                    },
+                    {
+                        name: 'channel',
+                        description: 'Add/update channel where audit results are posted',
+                        type: ApplicationCommandOptionType.Subcommand,
+                        options: [
+                            {
+                                name: 'channel_name',
+                                description: 'Audit results will be posted in this channel',
+                                type: ApplicationCommandOptionType.Channel,
+                            },
+                        ],
+                    },
                 ],
             },
         ],

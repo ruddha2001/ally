@@ -60,6 +60,7 @@ import { DiscordRestClient } from './lib/restClient.js';
 import { Database } from './lib/mongoDbClient.js';
 import { PnwKit } from './lib/pnwKit.js';
 import { attachEventListeners } from './events/index.js';
+import { subscribe, unsubscribe } from './services/subscriptionService.js';
 
 const initApp = async () => {
     console.log(`Starting process on PID ${process.pid}. Check winston log files for all logs.`);
@@ -73,6 +74,7 @@ const initApp = async () => {
         attachEventListeners();
         await Database.connectClient();
         PnwKit.initKit(process.env.PNW_API_KEY as string);
+        await subscribe();
         DiscordGatewayClient.getClient().login(process.env.DISCORD_TOKEN);
         DiscordRestClient.registerCommands(
             process.env.DISCORD_TOKEN as string,
@@ -95,7 +97,16 @@ const shutdown = () => {
         })
         .finally(() => {
             console.log(`Shutdown complete. Exiting process with PID ${process.pid}`);
-            process.exit(0);
+            unsubscribe()
+                .catch((subscriptionError) => {
+                    console.error(
+                        'Encountered an error when trying to close the subscriptions',
+                        subscriptionError,
+                    );
+                })
+                .finally(() => {
+                    process.exit(0);
+                });
         });
 };
 
