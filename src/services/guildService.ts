@@ -82,3 +82,47 @@ export const getAllAllianceIds = async (): Promise<number[]> => {
 
     return allianceIds.map((id) => parseInt(id, 10));
 };
+
+export const getAllNationIds = async (): Promise<number[]> => {
+    const keys = await Cache.getCache().get<number[]>(CACHE_KEYS.ALL_NATION_IDS);
+    if (keys) {
+        return keys;
+    }
+
+    const pipeline = [
+        {
+            $project: {
+                managed: { $objectToArray: '$managed_channels' },
+            },
+        },
+        { $unwind: '$managed' },
+        {
+            $match: {
+                'managed.v.nation_id': { $exists: true, $ne: null },
+            },
+        },
+        {
+            $group: {
+                _id: null,
+                nation_ids: { $addToSet: '$managed.v.nation_id' },
+            },
+        },
+        { $project: { _id: 0, nation_ids: 1 } },
+    ];
+
+    const nationIds = await (await Database.getDatabase())
+        .collection('guilds')
+        .aggregate<{ nation_ids: string[] }>(pipeline)
+        .toArray();
+
+    const transformedNationIds = nationIds.reduce((memo: number[], obj) => {
+        obj.nation_ids.forEach((id) => {
+            memo.push(parseInt(id, 10));
+        });
+        return memo;
+    }, []);
+
+    await Cache.getCache().set(CACHE_KEYS.ALL_NATION_IDS, transformedNationIds, 1 * 60 * 60 * 1000);
+
+    return transformedNationIds;
+};

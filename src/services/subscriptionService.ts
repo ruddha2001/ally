@@ -5,7 +5,7 @@ import {
 import { PnwKit } from '../lib/pnwKit.js';
 import { city } from 'pnwkit-2.0/build/src/interfaces/queries/city.js';
 import logger from '../lib/logger.js';
-import { getAllAllianceIds } from './guildService.js';
+import { getAllNationIds } from './guildService.js';
 
 const inMemoryChannelMap: Map<subscriptionModel, Map<subscriptionEvent, string>> = new Map<
     subscriptionModel,
@@ -15,7 +15,8 @@ const SupportedSubscriptionList = [subscriptionModel.CITY];
 const processSubscriptionChannels = async (
     opType: subscriptionEvent = subscriptionEvent.CREATE,
 ) => {
-    const all_alliance_ids = await getAllAllianceIds();
+    const allNationIds = await getAllNationIds();
+    console.log(allNationIds);
     for (const model of SupportedSubscriptionList) {
         for (const event of [
             subscriptionEvent.CREATE,
@@ -23,7 +24,7 @@ const processSubscriptionChannels = async (
             subscriptionEvent.DELETE,
         ]) {
             const channel = await PnwKit.getKit()?.subscriptionChannel(model, opType, {
-                alliance_id: all_alliance_ids,
+                nation_id: allNationIds,
             });
             if (channel) {
                 if (!inMemoryChannelMap.has(model)) {
@@ -63,7 +64,10 @@ export const unsubscribe = async () => {
 };
 
 const newCityHandler = (data: city[]) => {
-    console.log('New City', data[0]);
+    logger.debug(`[NEW CITY] Created by nation: ${data[0].nation_id}`);
+    data.forEach((city) => {
+        logger.info(`New City: ${city.name} processed for Nation ID: ${city.nation_id}`);
+    });
 };
 
 const updateCityHandler = (data: city[]) => {
