@@ -5,7 +5,10 @@ import {
 import { PnwKit } from '../lib/pnwKit.js';
 import { city } from 'pnwkit-2.0/build/src/interfaces/queries/city.js';
 import logger from '../lib/logger.js';
-import { getAllNationIds } from './guildService.js';
+import { getAllNationIds, getGuildIdAndManagedChannelKeyByNationId } from './guildService.js';
+import { DiscordGatewayClient } from '../lib/gatewayClient.js';
+import { renameChannel } from './channelService.js';
+import { getSingleNationByNationId } from './nationService.js';
 
 const inMemoryChannelMap: Map<subscriptionModel, Map<subscriptionEvent, string>> = new Map<
     subscriptionModel,
@@ -63,11 +66,34 @@ export const unsubscribe = async () => {
     await processSubscriptionChannels(subscriptionEvent.DELETE);
 };
 
-const newCityHandler = (data: city[]) => {
+const newCityHandler = async (data: city[]) => {
     logger.debug(`[NEW CITY] Created by nation: ${data[0].nation_id}`);
-    data.forEach((city) => {
-        logger.info(`New City: ${city.name} processed for Nation ID: ${city.nation_id}`);
-    });
+    const { nation_id } = data[0];
+    const guildAndManagedChannelId = await getGuildIdAndManagedChannelKeyByNationId(
+        nation_id as string,
+    );
+    const nationData = await getSingleNationByNationId(parseInt(nation_id as string, 10));
+    if (guildAndManagedChannelId) {
+        const { guild_id, managed_channel_keys } = guildAndManagedChannelId;
+        const client = DiscordGatewayClient.getClient();
+        const guild = await client.guilds.fetch(guild_id);
+        if (!guild) {
+            return logger.error(
+                `[newCityHandler] Did not match any guild with id ${guild_id}. Will not proceed further.`,
+            );
+        }
+        for (const key of managed_channel_keys) {
+            const channel = await guild.channels.fetch(key);
+            if (!channel) {
+                logger.error(
+                    `[newCityHandler] Did not match any channel with id ${key}, Will not proceed further for this channel.`,
+                );
+                continue;
+            }
+            await renameChannel(channel, `${nationData?.num_cities}-${nationData?.nation_name}`);
+        }
+    }
+    logger.debug(`[NEW CITY] Finished processing for nation: ${data[0].nation_id}`);
 };
 
 const updateCityHandler = (data: city[]) => {
