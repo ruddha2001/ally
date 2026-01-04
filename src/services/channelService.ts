@@ -2,6 +2,7 @@ import { ChannelType, Guild, GuildBasedChannel, GuildMember } from 'discord.js';
 import { validChannelTypes } from '../@types/channels.js';
 import { getGuildDataByGuildId } from './guildService.js';
 import { AllyError } from '../shared/allyError.js';
+import logger from '../lib/logger.js';
 
 /**
  * Find a guild channel by name using Discord-style "slug" normalization.
@@ -122,5 +123,11 @@ export const renameChannel = async (
         );
     }
 
-    await channel.setName(newChannelName);
+    if (channel.name !== newChannelName) {
+        await channel.setName(newChannelName);
+    } else {
+        logger.warn(
+            `Attempting to rename channel ${channel.name} (${channel.id}) with the same name`,
+        );
+    }
 };

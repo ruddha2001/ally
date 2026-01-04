@@ -2,6 +2,7 @@ import { CACHE_KEYS } from '../../constants.js';
 import { AllyGuildAuditLevel, AllyGuildDataInterface } from '../@types/guilds.js';
 import { Cache } from '../lib/cache.js';
 import { Database } from '../lib/mongoDbClient.js';
+import type { Document } from 'mongodb';
 
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
     await (await Database.getDatabase())
@@ -81,4 +82,109 @@ export const getAllAllianceIds = async (): Promise<number[]> => {
     await Cache.getCache().set(CACHE_KEYS.ALL_ALLIANCE_IDS, allianceIds, 1 * 60 * 60 * 1000);
 
     return allianceIds.map((id) => parseInt(id, 10));
+};
+
+export const getAllNationIds = async (): Promise<number[]> => {
+    const keys = await Cache.getCache().get<number[]>(CACHE_KEYS.ALL_NATION_IDS);
+    if (keys) {
+        return keys;
+    }
+
+    const pipeline = [
+        {
+            $project: {
+                managed: { $objectToArray: '$managed_channels' },
+            },
+        },
+        { $unwind: '$managed' },
+        {
+            $match: {
+                'managed.v.nation_id': { $exists: true, $ne: null },
+            },
+        },
+        {
+            $group: {
+                _id: null,
+                nation_ids: { $addToSet: '$managed.v.nation_id' },
+            },
+        },
+        { $project: { _id: 0, nation_ids: 1 } },
+    ];
+
+    const nationIds = await (await Database.getDatabase())
+        .collection('guilds')
+        .aggregate<{ nation_ids: string[] }>(pipeline)
+        .toArray();
+
+    const transformedNationIds = nationIds.reduce((memo: number[], obj) => {
+        obj.nation_ids.forEach((id) => {
+            memo.push(parseInt(id, 10));
+        });
+        return memo;
+    }, []);
+
+    await Cache.getCache().set(CACHE_KEYS.ALL_NATION_IDS, transformedNationIds, 1 * 60 * 60 * 1000);
+
+    return transformedNationIds;
+};
+
+export const getGuildIdAndManagedChannelKeyByNationId = async (
+    nationId: string | number,
+): Promise<{
+    guild_id: string;
+    managed_channel_keys: string[];
+} | null> => {
+    const nationIdStr = String(nationId);
+
+    const cacheKey = `${CACHE_KEYS.GUILD_BY_MANAGED_NATION_ID}:${nationIdStr}`;
+    const cached = await Cache.getCache().get<{
+        guild_id: string;
+        managed_channel_keys: string[];
+    } | null>(cacheKey);
+    if (cached) return cached;
+
+    const db = await Database.getDatabase();
+
+    const pipeline: Document[] = [
+        { $match: { managed_channels: { $type: 'object' } } },
+        {
+            $project: {
+                _id: 0,
+                guild_id: 1,
+                entries: { $objectToArray: '$managed_channels' },
+            },
+        },
+        {
+            $project: {
+                guild_id: 1,
+                matches: {
+                    $filter: {
+                        input: '$entries',
+                        as: 'e',
+                        cond: { $eq: ['$$e.v.nation_id', nationIdStr] },
+                    },
+                },
+            },
+        },
+        { $match: { $expr: { $gt: [{ $size: '$matches' }, 0] } } },
+        {
+            $project: {
+                guild_id: 1,
+                managed_channel_keys: {
+                    $map: { input: '$matches', as: 'm', in: '$$m.k' },
+                },
+            },
+        },
+        { $limit: 1 },
+    ];
+
+    const result = await db
+        .collection('guilds')
+        .aggregate<{ guild_id: string; managed_channel_keys: string[] }>(pipeline)
+        .toArray();
+
+    const lookup = result[0] ?? null;
+
+    await Cache.getCache().set(cacheKey, lookup, 10 * 60 * 1000);
+    return lookup;
 };

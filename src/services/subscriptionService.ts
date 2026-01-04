@@ -5,7 +5,10 @@ import {
 import { PnwKit } from '../lib/pnwKit.js';
 import { city } from 'pnwkit-2.0/build/src/interfaces/queries/city.js';
 import logger from '../lib/logger.js';
-import { getAllAllianceIds } from './guildService.js';
+import { getAllNationIds, getGuildIdAndManagedChannelKeyByNationId } from './guildService.js';
+import { DiscordGatewayClient } from '../lib/gatewayClient.js';
+import { renameChannel } from './channelService.js';
+import { getSingleNationByNationId } from './nationService.js';
 
 const inMemoryChannelMap: Map<subscriptionModel, Map<subscriptionEvent, string>> = new Map<
     subscriptionModel,
@@ -15,7 +18,7 @@ const SupportedSubscriptionList = [subscriptionModel.CITY];
 const processSubscriptionChannels = async (
     opType: subscriptionEvent = subscriptionEvent.CREATE,
 ) => {
-    const all_alliance_ids = await getAllAllianceIds();
+    const allNationIds = await getAllNationIds();
     for (const model of SupportedSubscriptionList) {
         for (const event of [
             subscriptionEvent.CREATE,
@@ -23,7 +26,7 @@ const processSubscriptionChannels = async (
             subscriptionEvent.DELETE,
         ]) {
             const channel = await PnwKit.getKit()?.subscriptionChannel(model, opType, {
-                alliance_id: all_alliance_ids,
+                nation_id: allNationIds,
             });
             if (channel) {
                 if (!inMemoryChannelMap.has(model)) {
@@ -62,8 +65,34 @@ export const unsubscribe = async () => {
     await processSubscriptionChannels(subscriptionEvent.DELETE);
 };
 
-const newCityHandler = (data: city[]) => {
-    console.log('New City', data[0]);
+const newCityHandler = async (data: city[]) => {
+    logger.debug(`[NEW CITY] Created by nation: ${data[0].nation_id}`);
+    const { nation_id } = data[0];
+    const guildAndManagedChannelId = await getGuildIdAndManagedChannelKeyByNationId(
+        nation_id as string,
+    );
+    const nationData = await getSingleNationByNationId(parseInt(nation_id as string, 10), 5, true);
+    if (guildAndManagedChannelId) {
+        const { guild_id, managed_channel_keys } = guildAndManagedChannelId;
+        const client = DiscordGatewayClient.getClient();
+        const guild = await client.guilds.fetch(guild_id);
+        if (!guild) {
+            return logger.error(
+                `[newCityHandler] Did not match any guild with id ${guild_id}. Will not proceed further.`,
+            );
+        }
+        for (const key of managed_channel_keys) {
+            const channel = await guild.channels.fetch(key);
+            if (!channel) {
+                logger.error(
+                    `[newCityHandler] Did not match any channel with id ${key}, Will not proceed further for this channel.`,
+                );
+                continue;
+            }
+            await renameChannel(channel, `${nationData?.num_cities}-${nationData?.nation_name}`);
+        }
+    }
+    logger.debug(`[NEW CITY] Finished processing for nation: ${data[0].nation_id}`);
 };
 
 const updateCityHandler = (data: city[]) => {
