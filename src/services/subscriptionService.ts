@@ -19,7 +19,6 @@ const processSubscriptionChannels = async (
     opType: subscriptionEvent = subscriptionEvent.CREATE,
 ) => {
     const allNationIds = await getAllNationIds();
-    console.log(allNationIds);
     for (const model of SupportedSubscriptionList) {
         for (const event of [
             subscriptionEvent.CREATE,
@@ -72,7 +71,7 @@ const newCityHandler = async (data: city[]) => {
     const guildAndManagedChannelId = await getGuildIdAndManagedChannelKeyByNationId(
         nation_id as string,
     );
-    const nationData = await getSingleNationByNationId(parseInt(nation_id as string, 10));
+    const nationData = await getSingleNationByNationId(parseInt(nation_id as string, 10), 5, true);
     if (guildAndManagedChannelId) {
         const { guild_id, managed_channel_keys } = guildAndManagedChannelId;
         const client = DiscordGatewayClient.getClient();
