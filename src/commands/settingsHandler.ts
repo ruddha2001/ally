@@ -19,6 +19,7 @@ import {
 } from '../services/guildService.js';
 import { AllyGuildAuditLevel, AllyGuildDataInterface } from '../@types/guilds.js';
 import logger from '../lib/logger.js';
+import { nanoid } from 'nanoid';
 
 const auditShowHandler = async (command: ChatInputCommandInteraction) => {
     const { guildId, guild } = command;
@@ -164,6 +165,7 @@ const auditAddHandler = async (command: ChatInputCommandInteraction) => {
                     factories: parseInt(mmrSplit[1], 10),
                     hangars: parseInt(mmrSplit[2], 10),
                     drydocks: parseInt(mmrSplit[3], 10),
+                    levelId: nanoid(10),
                 };
 
                 await addAuditLevel(guildId as string, levelData);
