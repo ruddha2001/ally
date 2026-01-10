@@ -83,6 +83,25 @@ export const addAuditRole = async (guildId: string, roleId: string) => {
     await updateGuildData(guildData as AllyGuildDataInterface);
 };
 
+export const removeAuditRole = async (guildId: string, auditLevelId: string) => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'removeAuditRole');
+
+    const { application_settings } = guildData as AllyGuildDataInterface;
+    if (!application_settings?.audit)
+        throwStaticError(STATIC_ERROR_CODES.MISSING_AUDIT_DATA, 'removeAuditRole');
+
+    const updatedAuditLevels: AllyGuildAuditLevel[] =
+        application_settings?.audit?.audit_mmr_slabs.filter(
+            (level) => level.levelId !== auditLevelId,
+        ) ?? [];
+    if (guildData?.application_settings?.audit?.audit_mmr_slabs) {
+        guildData.application_settings.audit.audit_mmr_slabs = updatedAuditLevels;
+    }
+
+    await updateGuildData(guildData as AllyGuildDataInterface);
+};
+
 export const getAllAllianceIds = async (): Promise<number[]> => {
     const keys = await Cache.getCache().get<number[]>(CACHE_KEYS.ALL_ALLIANCE_IDS);
     if (keys) {
