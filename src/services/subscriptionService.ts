@@ -92,15 +92,7 @@ const newCityHandler = async (data: city[]) => {
             await renameChannel(channel, `${nationData?.num_cities}-${nationData?.nation_name}`);
         }
     }
-    logger.debug(`[NEW CITY] Finished processing for nation: ${data[0].nation_id}`);
-};
-
-const updateCityHandler = (data: city[]) => {
-    console.log('Update City', data[0]);
-};
-
-const deleteCityHandler = (data: city[]) => {
-    console.log('Delete City', data[0]);
+    logger.debug(`[NEW CITY] Finished processing for nation: ${nation_id}`);
 };
 
 const callbackMapper = (model: subscriptionModel, event: subscriptionEvent): Function => {
@@ -109,10 +101,6 @@ const callbackMapper = (model: subscriptionModel, event: subscriptionEvent): Fun
             switch (event) {
                 case subscriptionEvent.CREATE:
                     return newCityHandler;
-                case subscriptionEvent.UPDATE:
-                    return updateCityHandler;
-                case subscriptionEvent.DELETE:
-                    return deleteCityHandler;
             }
     }
     return () => {};
