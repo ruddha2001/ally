@@ -52,7 +52,7 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
         if (
             leaderPosition.name?.toLowerCase() !== userNationData?.alliance_position?.toLowerCase()
         ) {
-            throwStaticError(STATIC_ERROR_CODES.USER_NOT_PRIVILEDGED, 'setupHandler', {
+            throwStaticError(STATIC_ERROR_CODES.USER_NOT_PRIVILEGED, 'setupHandler', {
                 current_position: userNationData?.alliance_position,
                 required_position: leaderPosition.name,
             });
@@ -81,6 +81,7 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
                 dataValidityInMins: 5,
                 dateFormat: 'DD MMM YYYY HH:mm:ss',
             },
+            admins: [user.username],
         };
 
         await updateGuildData(guildData);
