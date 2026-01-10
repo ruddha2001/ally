@@ -4,6 +4,7 @@ import { Cache } from '../lib/cache.js';
 import { Database } from '../lib/mongoDbClient.js';
 import type { Document } from 'mongodb';
 import { STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
+import { GuildMember } from 'discord.js';
 
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
     await (await Database.getDatabase())
@@ -50,7 +51,7 @@ export const linkChannelId = async (
 
 export const addAuditLevel = async (guildId: string, levelData: AllyGuildAuditLevel) => {
     const guildData = await getGuildDataByGuildId(guildId);
-    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addAuditLevel');
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addAuditRole');
 
     const { application_settings } = guildData as AllyGuildDataInterface;
     if (!application_settings?.audit) throw Error('NO_AUDIT_DATA');
@@ -216,4 +217,20 @@ export const verifyAdminPermission = async (
     if (!admins) return false;
 
     return admins.includes(username);
+};
+
+export const verifyAuditPermission = async (
+    guildId: string,
+    user: GuildMember,
+): Promise<boolean> => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData)
+        throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'verifyAuditPermission');
+
+    const { application_settings } = guildData as AllyGuildDataInterface;
+    if (!application_settings || !application_settings.audit?.audit_role_id) {
+        return false;
+    }
+
+    return user.roles.cache.has(application_settings.audit.audit_role_id);
 };

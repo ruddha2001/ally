@@ -3,6 +3,7 @@ import {
     APIEmbedField,
     ChatInputCommandInteraction,
     EmbedBuilder,
+    GuildMember,
     ModalBuilder,
     ModalSubmitInteraction,
     TextInputBuilder,
@@ -14,6 +15,7 @@ import {
     addAuditRole,
     getGuildDataByGuildId,
     verifyAdminPermission,
+    verifyAuditPermission,
 } from '../services/guildService.js';
 import { AllyGuildAuditLevel, AllyGuildDataInterface } from '../@types/guilds.js';
 import logger from '../lib/logger.js';
@@ -93,6 +95,12 @@ const auditRoleHandler = async (command: ChatInputCommandInteraction) => {
 };
 
 const auditAddHandler = async (command: ChatInputCommandInteraction) => {
+    const { member, guildId } = command;
+    const isAuditRole = await verifyAuditPermission(guildId as string, member as GuildMember);
+    if (!isAuditRole) {
+        return throwStaticError(STATIC_ERROR_CODES.NO_AUDIT_ROLE, 'auditAddHandler');
+    }
+
     const modal = new ModalBuilder()
         .setCustomId('newAuditLevelModal')
         .setTitle('Add a new Audit Level');
@@ -158,7 +166,7 @@ const auditAddHandler = async (command: ChatInputCommandInteraction) => {
                     drydocks: parseInt(mmrSplit[3], 10),
                 };
 
-                await addAuditLevel(command.guildId as string, levelData);
+                await addAuditLevel(guildId as string, levelData);
             } catch (error) {
                 logger.debug(error);
                 await submission.reply({
