@@ -156,33 +156,18 @@ const auditAddHandler = async (command: ChatInputCommandInteraction) => {
             const mmr = submission.fields.getTextInputValue('mmrCombined');
             const mmrSplit = [...mmr];
 
-            try {
-                const levelData: AllyGuildAuditLevel = {
-                    name: levelName,
-                    max_city: parseInt(cityMax, 10),
-                    min_city: parseInt(cityMin, 10),
-                    barracks: parseInt(mmrSplit[0], 10),
-                    factories: parseInt(mmrSplit[1], 10),
-                    hangars: parseInt(mmrSplit[2], 10),
-                    drydocks: parseInt(mmrSplit[3], 10),
-                    levelId: nanoid(10),
-                };
+            const levelData: AllyGuildAuditLevel = {
+                name: levelName,
+                max_city: parseInt(cityMax, 10),
+                min_city: parseInt(cityMin, 10),
+                barracks: parseInt(mmrSplit[0], 10),
+                factories: parseInt(mmrSplit[1], 10),
+                hangars: parseInt(mmrSplit[2], 10),
+                drydocks: parseInt(mmrSplit[3], 10),
+                levelId: nanoid(10),
+            };
 
-                await addAuditLevel(guildId as string, levelData);
-            } catch (error) {
-                logger.debug(error);
-                await submission.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor('Red')
-                            .setTitle('Could not add a new level')
-                            .setDescription(
-                                'There was an error when I was trying to add a new audit level',
-                            ),
-                    ],
-                });
-                return;
-            }
+            await addAuditLevel(guildId as string, levelData);
 
             await submission.reply({
                 embeds: [
