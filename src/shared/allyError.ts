@@ -20,6 +20,7 @@ export enum STATIC_ERROR_CODES {
     INVALID_ALLIANCE_ID = 'INVALID_ALLIANCE_ID',
     INVALID_DISCORD = 'INVALID_DISCORD',
     INVALID_NATION_ID = 'INVALID_NATION_ID',
+    MISSING_AUDIT_DATA = 'MISSING_AUDIT_DATA',
     NO_AUDIT_ROLE = 'NO_AUDIT_ROLE',
     SERVER_NOT_REGISTERED = 'SERVER_NOT_REGISTERED',
     USER_NOT_PRIVILEGED = 'USER_NOT_PRIVILEGED',
@@ -55,12 +56,18 @@ Scroll to the very bottom and update your Discord Username.`,
                 `It seems that the Nation ID/Link you have entered: ${args?.nation_id_or_link ?? 'None'} is not a valid one.
 Please retry; your nation URL will look like https://politicsandwar.com/nation/id=6`,
             );
+        case 'MISSING_AUDIT_DATA':
+            throw new AllyError(
+                `No audit data for guild`,
+                functionName,
+                `There is no audit data for this guild.`,
+            );
         case 'NO_AUDIT_ROLE':
             throw new AllyError(
                 `User does not have audit role`,
                 functionName,
                 `You do not have the audit role added for yourself.
-Please have <@&${args?.role_id}> added before you run this command.`,
+Please run \`/settings audit show\` to see which role you need for this operation.`,
             );
         case 'SERVER_NOT_REGISTERED':
             throw new AllyError(

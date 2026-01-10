@@ -6,16 +6,35 @@ import type { Document } from 'mongodb';
 import { STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
 import { GuildMember } from 'discord.js';
 
+const GUILD_CACHE_PREFIX = 'guild:by_id:';
+const GUILD_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const guildCacheKey = (guildId: string) => `${GUILD_CACHE_PREFIX}${guildId}`;
+
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
+    const { _id, ...withoutId } = guildData as unknown as {
+        _id?: unknown;
+    } & AllyGuildDataInterface;
     await (await Database.getDatabase())
         .collection('guilds')
-        .updateOne({ guild_id: guildData.guild_id }, { $set: guildData }, { upsert: true });
+        .updateOne({ guild_id: guildData.guild_id }, { $set: withoutId }, { upsert: true });
+
+    await Cache.getCache().set(guildCacheKey(guildData.guild_id), withoutId, GUILD_CACHE_TTL_MS);
 };
 
 export const getGuildDataByGuildId = async (guildId: string) => {
-    return await (await Database.getDatabase())
+    const cached = await Cache.getCache().get<AllyGuildDataInterface>(guildCacheKey(guildId));
+    if (cached) return cached;
+
+    const doc = await (await Database.getDatabase())
         .collection('guilds')
         .findOne<AllyGuildDataInterface>({ guild_id: guildId });
+
+    if (doc) {
+        await Cache.getCache().set(guildCacheKey(guildId), doc, GUILD_CACHE_TTL_MS);
+    }
+
+    return doc;
 };
 
 export const getNationIdFromManagedChannelId = async (
@@ -74,10 +93,30 @@ export const addAuditRole = async (guildId: string, roleId: string) => {
     if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addAuditRole');
 
     const { application_settings } = guildData as AllyGuildDataInterface;
-    if (!application_settings?.audit) throw Error('NO_AUDIT_DATA');
+    if (!application_settings?.audit)
+        throwStaticError(STATIC_ERROR_CODES.MISSING_AUDIT_DATA, 'addAuditRole');
 
     if (guildData?.application_settings?.audit) {
         guildData.application_settings.audit.audit_role_id = roleId;
+    }
+
+    await updateGuildData(guildData as AllyGuildDataInterface);
+};
+
+export const removeAuditRole = async (guildId: string, auditLevelId: string) => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'removeAuditRole');
+
+    const { application_settings } = guildData as AllyGuildDataInterface;
+    if (!application_settings?.audit)
+        throwStaticError(STATIC_ERROR_CODES.MISSING_AUDIT_DATA, 'removeAuditRole');
+
+    const updatedAuditLevels: AllyGuildAuditLevel[] =
+        application_settings?.audit?.audit_mmr_slabs.filter(
+            (level) => level.levelId !== auditLevelId,
+        ) ?? [];
+    if (guildData?.application_settings?.audit?.audit_mmr_slabs) {
+        guildData.application_settings.audit.audit_mmr_slabs = updatedAuditLevels;
     }
 
     await updateGuildData(guildData as AllyGuildDataInterface);

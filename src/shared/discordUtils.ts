@@ -51,11 +51,37 @@ export const parseAllianceLinkInput = (input: string | null): number | null => {
 };
 
 export const getColorCircleEmoji = (color: string): string | null => {
-    switch (color) {
-        case 'purple':
-            return '🟣 Purple';
+    switch (color.toLowerCase()) {
+        case 'aqua':
+            return '🌊 Aqua';
         case 'black':
             return '⚫ Black';
+        case 'blue':
+            return '🔵 Blue';
+        case 'brown':
+            return '🟤 Brown';
+        case 'green':
+            return '🟢 Green';
+        case 'lime':
+            return '🍋 Lime';
+        case 'maroon':
+            return '👜 Maroon';
+        case 'olive':
+            return '🫒 Olive';
+        case 'orange':
+            return '🟠 Orange';
+        case 'pink':
+            return '🌸 Pink';
+        case 'purple':
+            return '🟣 Purple';
+        case 'red':
+            return '🔴 Red';
+        case 'white':
+            return '⚪ White';
+        case 'yellow':
+            return '🟡 Yellow';
+        case 'beige':
+            return '🏰 Beige';
         case 'gray':
             return '🪦 Gray';
     }

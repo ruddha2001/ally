@@ -41,4 +41,5 @@ export interface AllyGuildAuditLevel {
     drydocks: number;
     min_city: number;
     max_city: number;
+    levelId: string;
 }

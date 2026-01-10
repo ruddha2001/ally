@@ -2,19 +2,28 @@ import { ButtonInteraction, ChannelType, PermissionsBitField } from 'discord.js'
 
 import { getGuildDataByGuildId } from '../services/guildService.js';
 import logger from '../lib/logger.js';
-import { ErrorResponses } from '../commands/errorResponses.js';
 
 export const applyForAllianceHandler = async (command: ButtonInteraction) => {
     try {
-        await command.deferReply({ ephemeral: true });
         const { user, guildId, guild } = command;
 
         const guildData = await getGuildDataByGuildId(guildId as string);
 
-        if (!guild || !guildData || !guildData.application_settings) {
-            // Silently ignore
-            return;
+        await command.deferUpdate();
+
+        if (command.message.editable) {
+            await command.message.edit({
+                content:
+                    !guild || !guildData || !guildData.application_settings
+                        ? 'This server is not configured for accepting new members.'
+                        : `Just a second ${user.username}, creating your ticket.`,
+                components: [],
+            });
+        } else {
+            logger.warn('Button message is not editable; cannot remove components.');
         }
+
+        if (!guild || !guildData || !guildData.application_settings) return;
 
         const { application_settings } = guildData;
 
@@ -47,16 +56,21 @@ This is your applicant ticket. We will be using this chat to help you get regist
 To begin, please use \`/register\` command with your nation ID/link.
 You can get your nation ID by logging into PnW, and click on Nation->View from the menu. You will see your Nation ID under Basic Information.`,
         });
-        await command.editReply({
+        await command.followUp({
+            ephemeral: true,
             content:
                 'You have been assigned your new ticket, please check and follow the instructions there. Welcome aboard!',
         });
     } catch (error) {
         logger.error('Unexpected error in applyForAllianceHandler', error);
-        if (command.replied) {
-            await command.editReply({
-                content: '❌ An error occurred while processing your request. Please try again.',
-            });
+        if (command.deferred || command.replied) {
+            await command
+                .editReply({ content: 'An error occurred. Please try again.' })
+                .catch(() => {});
+        } else {
+            await command
+                .reply({ ephemeral: true, content: 'An error occurred. Please try again.' })
+                .catch(() => {});
         }
     }
 };
