@@ -50,7 +50,7 @@ export const linkChannelId = async (
 
 export const addAuditLevel = async (guildId: string, levelData: AllyGuildAuditLevel) => {
     const guildData = await getGuildDataByGuildId(guildId);
-    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addAuditRole');
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addAuditLevel');
 
     const { application_settings } = guildData as AllyGuildDataInterface;
     if (!application_settings?.audit) throw Error('NO_AUDIT_DATA');
