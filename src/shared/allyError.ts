@@ -20,6 +20,7 @@ export enum STATIC_ERROR_CODES {
     INVALID_ALLIANCE_ID = 'INVALID_ALLIANCE_ID',
     INVALID_DISCORD = 'INVALID_DISCORD',
     INVALID_NATION_ID = 'INVALID_NATION_ID',
+    NO_AUDIT_ROLE = 'NO_AUDIT_ROLE',
     SERVER_NOT_REGISTERED = 'SERVER_NOT_REGISTERED',
     USER_NOT_PRIVILEGED = 'USER_NOT_PRIVILEGED',
     USER_NOT_REGISTERED = 'USER_NOT_REGISTERED',
@@ -54,6 +55,13 @@ Scroll to the very bottom and update your Discord Username.`,
                 `It seems that the Nation ID/Link you have entered: ${args?.nation_id_or_link ?? 'None'} is not a valid one.
 Please retry; your nation URL will look like https://politicsandwar.com/nation/id=6`,
             );
+        case 'NO_AUDIT_ROLE':
+            throw new AllyError(
+                `User does not have audit role`,
+                functionName,
+                `You do not have the audit role added for yourself.
+Please have <@&${args?.role_id}> added before you run this command.`,
+            );
         case 'SERVER_NOT_REGISTERED':
             throw new AllyError(
                 `Guild ID is not in database`,
@@ -76,10 +84,7 @@ To use my services, I need to know who you are. Please run the command \`/regist
             throw new AllyError(
                 `User does not have sufficient permissions`,
                 functionName,
-                `You are not allowed to perform this action. You do not have the required alliance permissions.
-
-You are a ${args?.current_position?.toUpperCase()}.
-You need to be a ${args?.required_position?.toUpperCase()} or above.`,
+                `You are not allowed to perform this action. You do not have the required admin permissions on this server.`,
             );
     }
 };

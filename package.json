@@ -1,6 +1,6 @@
 {
     "name": "ally",
-    "version": "1.5.1-alpha",
+    "version": "1.5.2-alpha",
     "main": "src/index.ts",
     "scripts": {
         "start": "tsx src/index.ts",

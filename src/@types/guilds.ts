@@ -18,6 +18,7 @@ export interface AllyGuildDataInterface {
         dataValidityInMins: number;
         dateFormat: string;
     };
+    admins: string[];
 }
 
 export interface AllyGuildApplicationSettings {
