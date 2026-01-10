@@ -76,10 +76,7 @@ To use my services, I need to know who you are. Please run the command \`/regist
             throw new AllyError(
                 `User does not have sufficient permissions`,
                 functionName,
-                `You are not allowed to perform this action. You do not have the required alliance permissions.
-
-You are a ${args?.current_position?.toUpperCase()}.
-You need to be a ${args?.required_position?.toUpperCase()} or above.`,
+                `You are not allowed to perform this action. You do not have the required admin permissions on this server.`,
             );
     }
 };

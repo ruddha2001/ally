@@ -3,6 +3,7 @@ import { AllyGuildAuditLevel, AllyGuildDataInterface } from '../@types/guilds.js
 import { Cache } from '../lib/cache.js';
 import { Database } from '../lib/mongoDbClient.js';
 import type { Document } from 'mongodb';
+import { STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
 
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
     await (await Database.getDatabase())
@@ -49,22 +50,36 @@ export const linkChannelId = async (
 
 export const addAuditLevel = async (guildId: string, levelData: AllyGuildAuditLevel) => {
     const guildData = await getGuildDataByGuildId(guildId);
-    if (!guildData) return;
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addAuditRole');
 
-    const { application_settings } = guildData;
+    const { application_settings } = guildData as AllyGuildDataInterface;
     if (!application_settings?.audit) throw Error('NO_AUDIT_DATA');
 
     const { audit } = application_settings;
     const existingLevel = audit.audit_mmr_slabs.find((level) => level.name === levelData.name);
     if (existingLevel) throw Error('DUPLICATE_NAME');
 
-    if (guildData.application_settings?.audit?.audit_mmr_slabs.length !== 0) {
-        guildData.application_settings?.audit?.audit_mmr_slabs.push(levelData);
+    if (guildData?.application_settings?.audit?.audit_mmr_slabs.length !== 0) {
+        guildData?.application_settings?.audit?.audit_mmr_slabs.push(levelData);
     } else {
         guildData.application_settings.audit.audit_mmr_slabs = [levelData];
     }
 
-    await updateGuildData(guildData);
+    await updateGuildData(guildData as AllyGuildDataInterface);
+};
+
+export const addAuditRole = async (guildId: string, roleId: string) => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addAuditRole');
+
+    const { application_settings } = guildData as AllyGuildDataInterface;
+    if (!application_settings?.audit) throw Error('NO_AUDIT_DATA');
+
+    if (guildData?.application_settings?.audit) {
+        guildData.application_settings.audit.audit_role_id = roleId;
+    }
+
+    await updateGuildData(guildData as AllyGuildDataInterface);
 };
 
 export const getAllAllianceIds = async (): Promise<number[]> => {
@@ -187,4 +202,18 @@ export const getGuildIdAndManagedChannelKeyByNationId = async (
 
     await Cache.getCache().set(cacheKey, lookup, 10 * 60 * 1000);
     return lookup;
+};
+
+export const verifyAdminPermission = async (
+    guildId: string,
+    username: string,
+): Promise<boolean> => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData)
+        throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'verifyAdminPermission');
+
+    const { admins } = guildData as AllyGuildDataInterface;
+    if (!admins) return false;
+
+    return admins.includes(username);
 };

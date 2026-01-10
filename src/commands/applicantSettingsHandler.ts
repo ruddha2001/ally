@@ -40,6 +40,7 @@ export const applicantSettingsHandler = async (command: ChatInputCommandInteract
                 ...(memberRole && { membership_role: memberRole?.id }),
                 ...(applicantCategory && { application_category_id: applicantCategory.id }),
             },
+            admins: [user.username],
         };
 
         await updateGuildData(updatedGuildData);

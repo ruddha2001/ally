@@ -9,7 +9,12 @@ import {
     TextInputStyle,
 } from 'discord.js';
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
-import { addAuditLevel, getGuildDataByGuildId } from '../services/guildService.js';
+import {
+    addAuditLevel,
+    addAuditRole,
+    getGuildDataByGuildId,
+    verifyAdminPermission,
+} from '../services/guildService.js';
 import { AllyGuildAuditLevel, AllyGuildDataInterface } from '../@types/guilds.js';
 import logger from '../lib/logger.js';
 
@@ -41,7 +46,7 @@ MMR (Barrack/Factory/Hangar/Drydocks): ${mmrSlab?.barracks}/${mmrSlab?.factories
                 .setColor('Fuchsia')
                 .setTitle(`Here are the current Audit Levels set for ${alliance_name}`)
                 .setDescription(
-                    `Role allowed to update audit settings: ${auditSettings?.audit_role_id ? guild?.roles.cache.get(auditSettings?.audit_role_id) : '**None**\nPlease have the leader add a role with \`/settings audit role\`'}`,
+                    `Role allowed to update audit settings: ${auditSettings?.audit_role_id ? guild?.roles.cache.get(auditSettings?.audit_role_id) : '**None**\nPlease have an admin add a role with \`/settings audit role\`'}`,
                 )
                 .setFields(
                     embedFieldMap && embedFieldMap.length !== 0
@@ -52,6 +57,33 @@ MMR (Barrack/Factory/Hangar/Drydocks): ${mmrSlab?.barracks}/${mmrSlab?.factories
                                   value: 'You can add a new level with \`/settings audit add\` command',
                               },
                           ],
+                )
+                .setFooter({
+                    text: `Powered by Ally: https://ally.ani.codes`,
+                }),
+        ],
+    });
+};
+
+const auditRoleHandler = async (command: ChatInputCommandInteraction) => {
+    const { user, guildId } = command;
+
+    const isAdmin = await verifyAdminPermission(guildId as string, user.username);
+    if (!isAdmin) {
+        return throwStaticError(STATIC_ERROR_CODES.USER_NOT_PRIVILEGED, 'auditRoleHandler');
+    }
+
+    const auditRole = command.options.getRole('audit_role', true);
+
+    await addAuditRole(guildId as string, auditRole.id);
+
+    await command.editReply({
+        embeds: [
+            new EmbedBuilder()
+                .setColor('Green')
+                .setTitle(`You have added an audit role!`)
+                .setDescription(
+                    `Users with ${auditRole.toString()} can now execute all audit related commands.`,
                 )
                 .setFooter({
                     text: `Powered by Ally: https://ally.ani.codes`,
@@ -176,6 +208,10 @@ export const settingsHandler = async (command: ChatInputCommandInteraction) => {
                     break;
                 case 'add':
                     await auditAddHandler(command);
+                    break;
+                case 'role':
+                    await command.deferReply();
+                    await auditRoleHandler(command);
                     break;
             }
         }
