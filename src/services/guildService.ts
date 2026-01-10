@@ -19,7 +19,7 @@ export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
         .collection('guilds')
         .updateOne({ guild_id: guildData.guild_id }, { $set: withoutId }, { upsert: true });
 
-    await Cache.getCache().set(guildCacheKey(guildData.guild_id), guildData, GUILD_CACHE_TTL_MS);
+    await Cache.getCache().set(guildCacheKey(guildData.guild_id), withoutId, GUILD_CACHE_TTL_MS);
 };
 
 export const getGuildDataByGuildId = async (guildId: string) => {
