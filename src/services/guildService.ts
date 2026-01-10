@@ -12,9 +12,12 @@ const GUILD_CACHE_TTL_MS = 5 * 60 * 1000;
 const guildCacheKey = (guildId: string) => `${GUILD_CACHE_PREFIX}${guildId}`;
 
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
+    const { _id, ...withoutId } = guildData as unknown as {
+        _id?: unknown;
+    } & AllyGuildDataInterface;
     await (await Database.getDatabase())
         .collection('guilds')
-        .updateOne({ guild_id: guildData.guild_id }, { $set: guildData }, { upsert: true });
+        .updateOne({ guild_id: guildData.guild_id }, { $set: withoutId }, { upsert: true });
 
     await Cache.getCache().set(guildCacheKey(guildData.guild_id), guildData, GUILD_CACHE_TTL_MS);
 };
