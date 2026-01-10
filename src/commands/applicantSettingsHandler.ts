@@ -6,6 +6,22 @@ import { AllyGuildDataInterface } from '../@types/guilds.js';
 import { verifyCommandPrivilege } from '../shared/verificationMiddleware.js';
 import logger from '../lib/logger.js';
 
+/**
+ * @deprecated This handler is deprecated and may be removed in a future release. Prefer the newer settings workflow/handler.
+ *
+ * Updates the guild's applicant management settings based on the invoking user's command options.
+ *
+ * This handler:
+ * - Validates the guild is registered.
+ * - Verifies the invoking user's alliance privilege (leader in production; member in development).
+ * - Ensures the invoking user belongs to the same alliance as the guild configuration.
+ * - Persists updated application settings (IA role, optional membership role, optional applicant category).
+ * - Stores the invoking user as the sole admin in the persisted guild data.
+ * - Replies with a confirmation message describing the enabled applicant management behavior.
+ *
+ * @param command - The Discord slash command interaction containing the guild context and provided options.
+ * @returns A promise that resolves once settings are persisted and a response is sent (or an error response is emitted).
+ */
 export const applicantSettingsHandler = async (command: ChatInputCommandInteraction) => {
     try {
         const { guildId, options, user } = command;
