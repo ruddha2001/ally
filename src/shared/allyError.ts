@@ -60,7 +60,7 @@ Please retry; your nation URL will look like https://politicsandwar.com/nation/i
                 `User does not have audit role`,
                 functionName,
                 `You do not have the audit role added for yourself.
-Please have <@&${args?.role_id}> added before you run this command.`,
+Please run \`/settings audit show\` to see which you role you need for this operation.`,
             );
         case 'SERVER_NOT_REGISTERED':
             throw new AllyError(

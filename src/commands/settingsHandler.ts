@@ -228,7 +228,7 @@ export const settingsHandler = async (command: ChatInputCommandInteraction) => {
         if (error instanceof AllyError) {
             throw error;
         } else {
-            throw new AllyError('Encountered unexpected error', 'glanceHandler');
+            throw new AllyError('Encountered unexpected error', 'settingsHandler');
         }
     }
 };
