@@ -29,10 +29,10 @@ export class PnwKit {
      *
      * @returns {Kit} The PNWKit client instance.
      */
-    static getKit() {
+    static getKit(): Kit {
         if (!PnwKit.kit) {
             PnwKit.initKit(process.env.PNW_API_KEY as string);
         }
-        return PnwKit.kit;
+        return PnwKit.kit as Kit;
     }
 }
