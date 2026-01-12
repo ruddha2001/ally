@@ -1,6 +1,10 @@
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
-import { getGuildDataByGuildId, updateGuildData } from '../services/guildService.js';
+import {
+    getGuildDataByGuildId,
+    updateGuildData,
+    verifyAdminPermission,
+} from '../services/guildService.js';
 import { parseAllianceLinkInput } from '../shared/discordUtils.js';
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
 import { getAllianceById, updateAllianceData } from '../services/allianceService.js';
@@ -9,6 +13,29 @@ import logger from '../lib/logger.js';
 import { AllyAllianceInterface, AllyAlliancePositionInterface } from '../@types/alliances.js';
 import { AllyGuildDataInterface } from '../@types/guilds.js';
 
+/**
+ * @deprecated This command handler is deprecated and may be removed in a future release. Prefer the newer guild/alliance setup flow using /settings.
+ *
+ * @summary Handles the `/setup` command for initial guild configuration and alliance association.
+ *
+ * @description
+ * Defers the interaction reply, validates the invoking user is registered, parses and validates the provided
+ * alliance ID/link, associates the alliance with the current Discord guild, and persists guild configuration
+ * (welcome channel and verification roles). Responds with an embed indicating whether settings were created
+ * or updated.
+ *
+ * The handler also attempts to validate administrative privileges for the invoking user and records them
+ * as an admin for the guild configuration.
+ *
+ * @param command - The Discord chat input command interaction containing options:
+ * `alliance_id_or_link`, `welcome_channel`, `unverified_role`, and `registered_role`.
+ *
+ * @returns A promise that resolves when the interaction reply has been edited with the result embed.
+ *
+ * @throws {AllyError}
+ * Thrown for known error conditions (e.g., user not registered, invalid alliance ID, insufficient privileges).
+ * Unknown errors are wrapped in an {@link AllyError}.
+ */
 export const setupHandler = async (command: ChatInputCommandInteraction) => {
     try {
         await command.deferReply();
@@ -49,13 +76,8 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
             leaderIndex > 0 ? leaderIndex - 1 : 0
         ];
 
-        if (
-            leaderPosition.name?.toLowerCase() !== userNationData?.alliance_position?.toLowerCase()
-        ) {
-            throwStaticError(STATIC_ERROR_CODES.USER_NOT_PRIVILEGED, 'setupHandler', {
-                current_position: userNationData?.alliance_position,
-                required_position: leaderPosition.name,
-            });
+        if (await verifyAdminPermission(guildId as string, user.username)) {
+            throwStaticError(STATIC_ERROR_CODES.USER_NOT_PRIVILEGED, 'setupHandler');
         }
 
         await updateAllianceData({
