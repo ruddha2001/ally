@@ -74,7 +74,7 @@ const initApp = async () => {
         attachEventListeners();
         await Database.connectClient();
         PnwKit.initKit(process.env.PNW_API_KEY as string);
-        await subscribe();
+        // await subscribe();
         DiscordGatewayClient.getClient().login(process.env.DISCORD_TOKEN);
         DiscordRestClient.registerCommands(
             process.env.DISCORD_TOKEN as string,
