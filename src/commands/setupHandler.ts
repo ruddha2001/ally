@@ -76,7 +76,7 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
             leaderIndex > 0 ? leaderIndex - 1 : 0
         ];
 
-        if (await verifyAdminPermission(guildId as string, user.username)) {
+        if (!(await verifyAdminPermission(guildId as string, user.username))) {
             throwStaticError(STATIC_ERROR_CODES.USER_NOT_PRIVILEGED, 'setupHandler');
         }
 
