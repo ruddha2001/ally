@@ -11,10 +11,11 @@ export const applyForAllianceHandler = async (command: ButtonInteraction) => {
 
         await command.deferUpdate();
 
+        console.log(guildData, guildData?.application_settings);
         if (command.message.editable) {
             await command.message.edit({
                 content:
-                    !guild || !guildData || !guildData.application_settings
+                    !guildData || !guildData.application_settings
                         ? 'This server is not configured for accepting new members.'
                         : `Just a second ${user.username}, creating your ticket.`,
                 components: [],
