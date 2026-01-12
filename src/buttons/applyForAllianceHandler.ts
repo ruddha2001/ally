@@ -11,7 +11,6 @@ export const applyForAllianceHandler = async (command: ButtonInteraction) => {
 
         await command.deferUpdate();
 
-        console.log(guildData, guildData?.application_settings);
         if (command.message.editable) {
             await command.message.edit({
                 content:
