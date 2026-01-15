@@ -137,7 +137,7 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
             const nationName = nationData?.nation_name;
             const continent = nationData?.continent;
             const isUpdate = Boolean(templates?.build);
-            if (channelData?.templates?.build || channelData?.templates?.build !== templateString) {
+            if (!channelData?.templates?.build || channelData?.templates?.build !== templateString) {
                 if (channelData?.templates) {
                     channelData.templates.build = templateString;
                     channelData.templates.buildName = buildName;
