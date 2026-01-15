@@ -8,17 +8,23 @@ export interface AllyGuildDataInterface {
     unverified_role: string;
     application_settings?: AllyGuildApplicationSettings;
     managed_channels: {
-        [channel_id: string]: {
-            created_at?: Date;
-            type?: string;
-            nation_id: string;
-        };
+        [channel_id: string]: AllyManagedChannel;
     };
     config: {
         dataValidityInMins: number;
         dateFormat: string;
     };
     admins: string[];
+}
+
+export interface AllyManagedChannel {
+    created_at?: Date;
+    type?: string;
+    nation_id: string;
+    templates?: {
+        build?: string;
+        warChest?: string;
+    };
 }
 
 export interface AllyGuildApplicationSettings {
@@ -29,6 +35,10 @@ export interface AllyGuildApplicationSettings {
         audit_role_id: string;
         audit_channel_id: string;
         audit_mmr_slabs: Array<AllyGuildAuditLevel>;
+    };
+    roles?: {
+        build: string;
+        warChest: string;
     };
 }
 
