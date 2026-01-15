@@ -31,11 +31,5 @@ jobs:
                       cd ~/ally
                     fi
                     npm ci
-                    export DISCORD_TOKEN="${{ secrets.DISCORD_TOKEN }}"
-                    export DISCORD_CLIENT_ID="${{ secrets.DISCORD_CLIENT_ID }}"
-                    export MONGODB_URI="${{ secrets.MONGODB_URI }}"
-                    export PNW_API_KEY="${{ secrets.PNW_API_KEY }}"
-                    export NODE_ENV="production"
-                    export ENABLE_SUBSCRIPTIONS="true"
                     pm2 describe ally > /dev/null 2>&1 && pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
                   EOF
