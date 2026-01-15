@@ -9,7 +9,11 @@ import { GuildMember } from 'discord.js';
 const GUILD_CACHE_PREFIX = 'guild:by_id:';
 const GUILD_CACHE_TTL_MS = 5 * 60 * 1000;
 
+const MANAGED_CHANNELS_CACHE_PREFIX = 'guild:managed_channels:';
+const MANAGED_CHANNELS_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
 const guildCacheKey = (guildId: string) => `${GUILD_CACHE_PREFIX}${guildId}`;
+const managedChannelsCacheKey = (guildId: string) => `${MANAGED_CHANNELS_CACHE_PREFIX}${guildId}`;
 
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
     const { _id, ...withoutId } = guildData as unknown as {
@@ -20,6 +24,7 @@ export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
         .updateOne({ guild_id: guildData.guild_id }, { $set: withoutId }, { upsert: true });
 
     await Cache.getCache().set(guildCacheKey(guildData.guild_id), withoutId, GUILD_CACHE_TTL_MS);
+    await Cache.getCache().delete(managedChannelsCacheKey(guildData.guild_id));
 };
 
 export const getGuildDataByGuildId = async (guildId: string) => {
@@ -37,17 +42,40 @@ export const getGuildDataByGuildId = async (guildId: string) => {
     return doc;
 };
 
+const getManagedChannels = async (guildId: string) => {
+    const cached = await Cache.getCache().get<AllyGuildDataInterface['managed_channels']>(
+        managedChannelsCacheKey(guildId),
+    );
+    if (cached) return cached;
+
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData || !guildData.managed_channels) return null;
+    const { managed_channels } = guildData;
+
+    await Cache.getCache().set(
+        managedChannelsCacheKey(guildId),
+        managed_channels,
+        MANAGED_CHANNELS_CACHE_TTL_MS,
+    );
+
+    return managed_channels;
+};
+
 export const getNationIdFromManagedChannelId = async (
     guildId: string,
     channelId: string,
 ): Promise<string | null> => {
-    const guildData = await getGuildDataByGuildId(guildId);
-    if (!guildData || !guildData.managed_channels) return null;
-    const { managed_channels } = guildData;
-    const channel = managed_channels[channelId];
+    const managedChannels = await getManagedChannels(guildId);
+    if (!managedChannels) return null;
+    const channel = managedChannels[channelId];
     if (!channel) return null;
 
     return channel.nation_id;
+};
+
+export const getManagedChannelDataFromChannelId = async (guildId: string, channelId: string) => {
+    const managedChannels = await getManagedChannels(guildId);
+    return managedChannels?.[channelId];
 };
 
 export const linkChannelId = async (
