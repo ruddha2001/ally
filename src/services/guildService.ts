@@ -1,5 +1,9 @@
 import { CACHE_KEYS } from '../../constants.js';
-import { AllyGuildAuditLevel, AllyGuildDataInterface } from '../@types/guilds.js';
+import {
+    AllyGuildAuditLevel,
+    AllyGuildDataInterface,
+    AllyManagedChannel,
+} from '../@types/guilds.js';
 import { Cache } from '../lib/cache.js';
 import { Database } from '../lib/mongoDbClient.js';
 import type { Document } from 'mongodb';
@@ -78,6 +82,22 @@ export const getManagedChannelDataFromChannelId = async (guildId: string, channe
     return managedChannels?.[channelId];
 };
 
+export const updateManagedChannelDataByChannelId = async (
+    guildId: string,
+    channelId: string,
+    channelData: AllyManagedChannel,
+) => {
+    await (await Database.getDatabase())
+        .collection('guilds')
+        .updateOne(
+            { guild_id: guildId },
+            { $set: { [`managed_channels.${channelId}`]: channelData } },
+        );
+
+    await Cache.getCache().delete(guildCacheKey(guildId));
+    await Cache.getCache().delete(managedChannelsCacheKey(guildId));
+};
+
 export const linkChannelId = async (
     guildId: string,
     channelId: string,
@@ -96,6 +116,11 @@ export const linkChannelId = async (
     await updateGuildData(guildData);
 };
 
+/**
+ * @deprecated Audit Levels will be removed
+ * @param guildId
+ * @param levelData
+ */
 export const addAuditLevel = async (guildId: string, levelData: AllyGuildAuditLevel) => {
     const guildData = await getGuildDataByGuildId(guildId);
     if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addAuditRole');

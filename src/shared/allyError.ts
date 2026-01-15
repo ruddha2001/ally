@@ -19,6 +19,7 @@ export class AllyError extends Error {
 export enum STATIC_ERROR_CODES {
     INVALID_ALLIANCE_ID = 'INVALID_ALLIANCE_ID',
     INVALID_DISCORD = 'INVALID_DISCORD',
+    INVALID_JSON_STRING = 'INVALID_JSON_STRING',
     INVALID_NATION_ID = 'INVALID_NATION_ID',
     MISSING_AUDIT_DATA = 'MISSING_AUDIT_DATA',
     NO_AUDIT_ROLE = 'NO_AUDIT_ROLE',
@@ -49,6 +50,12 @@ Please retry; your nation URL will look like https://politicsandwar.com/alliance
                 
 You can update your discord username at https://politicsandwar.com/nation/edit/
 Scroll to the very bottom and update your Discord Username.`,
+            );
+        case 'INVALID_JSON_STRING':
+            throw new AllyError(
+                `Empty or malformed JSON`,
+                functionName,
+                `You either entered an empty or a malformed JSON string.`,
             );
         case 'INVALID_NATION_ID':
             throw new AllyError(
