@@ -1,6 +1,7 @@
 import {
     ActionRowBuilder,
     ChatInputCommandInteraction,
+    GuildMember,
     ModalBuilder,
     ModalSubmitInteraction,
     TextInputBuilder,
@@ -9,7 +10,9 @@ import {
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
 import {
     getManagedChannelDataFromChannelId,
+    RoleManager,
     updateManagedChannelDataByChannelId,
+    verifyRole,
 } from '../services/guildService.js';
 import { AllyManagedChannel } from '../@types/guilds.js';
 import { buildDiscordEmbed, EmbedType } from '../shared/discordEmbedBuilder.js';
@@ -53,7 +56,12 @@ const buildShowHandler = async (command: ChatInputCommandInteraction) => {
 };
 
 const buildSetHandler = async (command: ChatInputCommandInteraction) => {
-    const { guildId, channelId } = command;
+    const { guildId, channelId, member } = command;
+
+    if (!(await verifyRole(guildId as string, member as GuildMember, RoleManager.build))) {
+        throwStaticError(STATIC_ERROR_CODES.NO_VALID_ROLE, 'buildSetHandler');
+    }
+
     const channelData = await getManagedChannelDataFromChannelId(guildId as string, channelId);
 
     if (!channelData) {

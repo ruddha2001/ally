@@ -37,8 +37,9 @@ export interface AllyGuildApplicationSettings {
         audit_mmr_slabs: Array<AllyGuildAuditLevel>;
     };
     roles?: {
-        build: string;
-        warChest: string;
+        audit?: string;
+        build?: string;
+        warChest?: string;
     };
 }
 

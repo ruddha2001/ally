@@ -23,6 +23,7 @@ export enum STATIC_ERROR_CODES {
     INVALID_NATION_ID = 'INVALID_NATION_ID',
     MISSING_AUDIT_DATA = 'MISSING_AUDIT_DATA',
     NO_AUDIT_ROLE = 'NO_AUDIT_ROLE',
+    NO_VALID_ROLE = 'NO_VALID_ROLE',
     SERVER_NOT_REGISTERED = 'SERVER_NOT_REGISTERED',
     TICKET_NOT_LINKED = 'TICKET_NOT_LINKED',
     USER_NOT_PRIVILEGED = 'USER_NOT_PRIVILEGED',
@@ -76,6 +77,13 @@ Please retry; your nation URL will look like https://politicsandwar.com/nation/i
                 functionName,
                 `You do not have the audit role added for yourself.
 Please run \`/settings audit show\` to see which role you need for this operation.`,
+            );
+        case 'NO_VALID_ROLE':
+            throw new AllyError(
+                `User does not have audit role`,
+                functionName,
+                `You do not have the required role added for yourself.
+Please contact an admin to get the required role`,
             );
         case 'SERVER_NOT_REGISTERED':
             throw new AllyError(

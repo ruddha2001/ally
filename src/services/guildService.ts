@@ -19,6 +19,12 @@ const MANAGED_CHANNELS_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 const guildCacheKey = (guildId: string) => `${GUILD_CACHE_PREFIX}${guildId}`;
 const managedChannelsCacheKey = (guildId: string) => `${MANAGED_CHANNELS_CACHE_PREFIX}${guildId}`;
 
+export enum RoleManager {
+    audit = 'audit',
+    build = 'build',
+    warChest = 'warChest',
+}
+
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
     const { _id, ...withoutId } = guildData as unknown as {
         _id?: unknown;
@@ -311,6 +317,12 @@ export const verifyAdminPermission = async (
     return admins.includes(username);
 };
 
+/**
+ * @deprecated User verifyRole()
+ * @param guildId
+ * @param user
+ * @returns
+ */
 export const verifyAuditPermission = async (
     guildId: string,
     user: GuildMember,
@@ -325,4 +337,16 @@ export const verifyAuditPermission = async (
     }
 
     return user.roles.cache.has(application_settings.audit.audit_role_id);
+};
+
+export const verifyRole = async (guildId: string, user: GuildMember, role: RoleManager) => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'verifyRole');
+
+    const { application_settings } = guildData as AllyGuildDataInterface;
+    if (!application_settings || !application_settings.roles || !application_settings.roles[role]) {
+        return false;
+    }
+
+    return user.roles.cache.has(application_settings.roles[role]);
 };
