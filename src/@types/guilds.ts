@@ -23,6 +23,7 @@ export interface AllyManagedChannel {
     nation_id: string;
     templates?: {
         build?: string;
+        buildName?: string;
         warChest?: string;
     };
 }

@@ -50,8 +50,11 @@ const buildShowHandler = async (command: ChatInputCommandInteraction) => {
         embeds: [
             buildDiscordEmbed({
                 type: EmbedType.member,
-                title: `🏢 Here is the current build assigned to ${nationName}`,
-                description: templates.build,
+                title: `🏢 Here is the current build assigned to ${nationName} (${mapContinentToName(continent as string)})`,
+                fields: [
+                    { name: 'Build Name', value: templates.buildName! },
+                    { name: 'Template', value: templates.build! },
+                ],
             }),
         ],
     });
@@ -74,15 +77,22 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
         .setCustomId('buildTemplateModal')
         .setTitle('Assign a build template');
 
-    const levelNameInput = new TextInputBuilder()
+    const buildNameInput = new TextInputBuilder()
+        .setCustomId('buildName')
+        .setLabel('Enter the build name')
+        .setPlaceholder('Build Name')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    const buildTemplateInput = new TextInputBuilder()
         .setCustomId('templateString')
         .setLabel('Enter the build template')
         .setPlaceholder('JSON Build Template')
         .setStyle(TextInputStyle.Paragraph)
         .setRequired(true);
 
-    const actionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(levelNameInput);
-    modal.addComponents(actionRow);
+    modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(buildNameInput));
+    modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(buildTemplateInput));
 
     await command.showModal(modal);
 
@@ -95,6 +105,7 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
         if (submission) {
             await submission.deferReply();
 
+            const buildName = submission.fields.getTextInputValue('buildName');
             let templateString = submission.fields.getTextInputValue('templateString');
             if (!templateString || templateString.length === 0) {
                 return submission.editReply({
@@ -129,9 +140,11 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
             if (channelData?.templates?.build || channelData?.templates?.build !== templateString) {
                 if (channelData?.templates) {
                     channelData.templates.build = templateString;
+                    channelData.templates.buildName = buildName;
                 } else {
                     channelData!.templates = {
                         build: templateString,
+                        buildName,
                     };
                 }
                 await updateManagedChannelDataByChannelId(
@@ -145,8 +158,12 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
                 embeds: [
                     buildDiscordEmbed({
                         type: EmbedType.member,
-                        title: `✅ Build has been ${isUpdate ? 'updated' : 'set'} for ${nationName} ${mapContinentToName(continent as string)})`,
-                        description: templateString,
+                        title: `✅ Build has been ${isUpdate ? 'updated' : 'set'} for ${nationName} (${mapContinentToName(continent as string)})`,
+                        description: 'Here are the details',
+                        fields: [
+                            { name: 'Build Name', value: buildName },
+                            { name: 'Template', value: templateString },
+                        ],
                     }),
                 ],
             });
