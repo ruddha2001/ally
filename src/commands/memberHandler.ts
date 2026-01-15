@@ -67,7 +67,7 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
     const channelData = await getManagedChannelDataFromChannelId(guildId as string, channelId);
 
     if (!channelData) {
-        throwStaticError(STATIC_ERROR_CODES.TICKET_NOT_LINKED, 'buildShowHandler');
+        throwStaticError(STATIC_ERROR_CODES.TICKET_NOT_LINKED, 'buildSetHandler');
     }
 
     const modal = new ModalBuilder()
