@@ -23,6 +23,30 @@ jobs:
               run: |
                   ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
                     REPO_URL="git@github.com:${{ github.repository }}.git"
+
+                    # Make sure shell init files are sourced so nvm/npm/global npm bins are on PATH
+                    [ -f ~/.profile ] && . ~/.profile
+                    [ -f ~/.bashrc ] && . ~/.bashrc
+                    [ -f ~/.bash_profile ] && . ~/.bash_profile
+
+                    # If you use nvm, load it (adjust NVM_DIR if you installed nvm somewhere else)
+                    export NVM_DIR="$HOME/.nvm"
+                    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+                    # optional: use the default or a specific node version
+                    # nvm use default --silent || nvm use --lts --silent
+
+                    # optional: add common user-local bin locations
+                    export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+
+                    # Debugging: print PATH and check locations (safe; no secrets)
+                    echo "PATH=$PATH"
+                    command -v node || true
+                    command -v npm || true
+                    command -v pm2 || true
+                    node --version 2>/dev/null || true
+                    npm --version 2>/dev/null || true
+                    pm2 --version 2>/dev/null || true
+
                     if [ -d ~/ally ]; then
                       cd ~/ally
                       git pull origin main
@@ -30,12 +54,16 @@ jobs:
                       git clone $REPO_URL ~/ally
                       cd ~/ally
                     fi
+
                     npm ci
+
                     export DISCORD_TOKEN="${{ secrets.DISCORD_TOKEN }}"
                     export DISCORD_CLIENT_ID="${{ secrets.DISCORD_CLIENT_ID }}"
                     export MONGODB_URI="${{ secrets.MONGODB_URI }}"
                     export PNW_API_KEY="${{ secrets.PNW_API_KEY }}"
                     export NODE_ENV="production"
                     export ENABLE_SUBSCRIPTIONS="true"
+
+                    # Start/reload with pm2 (will work once pm2 is on PATH)
                     pm2 describe ally > /dev/null 2>&1 && pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
                   EOF
