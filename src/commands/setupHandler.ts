@@ -104,6 +104,7 @@ export const setupHandler = async (command: ChatInputCommandInteraction) => {
                 dateFormat: 'DD MMM YYYY HH:mm:ss',
             },
             admins: [user.username],
+            application_settings: {},
         };
 
         await updateGuildData(guildData);
