@@ -9,6 +9,7 @@ import { applyForAllianceHandler } from '../buttons/applyForAllianceHandler.js';
 import { sharedInteractionErrorHandler } from '../shared/allyError.js';
 import { glanceHandler } from '../commands/glanceHandler.js';
 import { settingsHandler } from '../commands/settingsHandler.js';
+import { memberHandler } from '../commands/memberHandler.js';
 
 export const interactionCreateHandler = async (interaction: Interaction) => {
     if (interaction.isButton()) {
@@ -74,6 +75,11 @@ Ally slash commands are meant to be run inside a Discord Server.`,
                 break;
             case 'settings':
                 settingsHandler(command).catch((error) => {
+                    sharedInteractionErrorHandler(error, command);
+                });
+                break;
+            case 'member':
+                memberHandler(command).catch((error) => {
                     sharedInteractionErrorHandler(error, command);
                 });
                 break;
