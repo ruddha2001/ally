@@ -19,10 +19,13 @@ export class AllyError extends Error {
 export enum STATIC_ERROR_CODES {
     INVALID_ALLIANCE_ID = 'INVALID_ALLIANCE_ID',
     INVALID_DISCORD = 'INVALID_DISCORD',
+    INVALID_JSON_STRING = 'INVALID_JSON_STRING',
     INVALID_NATION_ID = 'INVALID_NATION_ID',
     MISSING_AUDIT_DATA = 'MISSING_AUDIT_DATA',
     NO_AUDIT_ROLE = 'NO_AUDIT_ROLE',
+    NO_VALID_ROLE = 'NO_VALID_ROLE',
     SERVER_NOT_REGISTERED = 'SERVER_NOT_REGISTERED',
+    TICKET_NOT_LINKED = 'TICKET_NOT_LINKED',
     USER_NOT_PRIVILEGED = 'USER_NOT_PRIVILEGED',
     USER_NOT_REGISTERED = 'USER_NOT_REGISTERED',
 }
@@ -49,6 +52,12 @@ Please retry; your nation URL will look like https://politicsandwar.com/alliance
 You can update your discord username at https://politicsandwar.com/nation/edit/
 Scroll to the very bottom and update your Discord Username.`,
             );
+        case 'INVALID_JSON_STRING':
+            throw new AllyError(
+                `Empty or malformed JSON`,
+                functionName,
+                `You either entered an empty or a malformed JSON string.`,
+            );
         case 'INVALID_NATION_ID':
             throw new AllyError(
                 `Parsed Nation ID is null, input was ${args?.nation_id_or_link}`,
@@ -69,6 +78,13 @@ Please retry; your nation URL will look like https://politicsandwar.com/nation/i
                 `You do not have the audit role added for yourself.
 Please run \`/settings audit show\` to see which role you need for this operation.`,
             );
+        case 'NO_VALID_ROLE':
+            throw new AllyError(
+                `User does not have required role`,
+                functionName,
+                `You do not have the required role added for yourself.
+Please contact an admin to get the required role`,
+            );
         case 'SERVER_NOT_REGISTERED':
             throw new AllyError(
                 `Guild ID is not in database`,
@@ -78,6 +94,14 @@ Please run \`/settings audit show\` to see which role you need for this operatio
 As a PnW Alliance Management Bot, I can help you only in alliance servers.
 
 If you are the mighty Alliance Leader, please run the command \`/setup\` so that I can connect this server to your alliance. Only an Alliance Leader can register an alliance.`,
+            );
+        case 'TICKET_NOT_LINKED':
+            throw new AllyError(
+                `Ticket is not registered to any nation`,
+                functionName,
+                `This channel is not a ticket that is registered to any nation.
+If the nation has a Discord account, please ask them to register with Ally inside this channel.
+If the nation is a non-Discord user, please convert this channel to a ticket from Ally Web Portal`,
             );
         case 'USER_NOT_REGISTERED':
             throw new AllyError(

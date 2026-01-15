@@ -156,4 +156,65 @@ export const commandList: DiscordCommandType[] = [
             },
         ],
     },
+    {
+        name: 'member',
+        description: 'Member specific functions for a ticket',
+        options: [
+            {
+                name: 'build',
+                description: 'Settings related to member build template',
+                type: ApplicationCommandOptionType.SubcommandGroup,
+                options: [
+                    {
+                        name: 'show',
+                        description: 'Show the current build assigned for this member',
+                        type: ApplicationCommandOptionType.Subcommand,
+                    },
+                    {
+                        name: 'set',
+                        description: 'Set a build template for this member',
+                        type: ApplicationCommandOptionType.Subcommand,
+                    },
+                    {
+                        name: 'role',
+                        description:
+                            '[Admin Only] Specify the role that allows setting build templates',
+                        type: ApplicationCommandOptionType.Subcommand,
+                        options: [
+                            {
+                                name: 'build_role',
+                                description:
+                                    'Users with this role will be allowed to assign build templates',
+                                type: ApplicationCommandOptionType.Role,
+                                required: true,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                name: 'war_chest',
+                description: 'Settings related to member war chest',
+                type: ApplicationCommandOptionType.SubcommandGroup,
+                options: [
+                    {
+                        name: 'show',
+                        description: 'Show the current war chest assigned for this member',
+                        type: ApplicationCommandOptionType.Subcommand,
+                    },
+                    {
+                        name: 'set',
+                        description: 'Set a war chest template for this member',
+                        type: ApplicationCommandOptionType.Subcommand,
+                    },
+                    {
+                        name: 'role',
+                        description:
+                            '[Admin Only] Specify the role that allows setting war chest templates',
+                        type: ApplicationCommandOptionType.Subcommand,
+                    },
+                ],
+            },
+        ],
+    },
 ];

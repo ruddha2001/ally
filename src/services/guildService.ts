@@ -1,5 +1,9 @@
 import { CACHE_KEYS } from '../../constants.js';
-import { AllyGuildAuditLevel, AllyGuildDataInterface } from '../@types/guilds.js';
+import {
+    AllyGuildAuditLevel,
+    AllyGuildDataInterface,
+    AllyManagedChannel,
+} from '../@types/guilds.js';
 import { Cache } from '../lib/cache.js';
 import { Database } from '../lib/mongoDbClient.js';
 import type { Document } from 'mongodb';
@@ -9,7 +13,17 @@ import { GuildMember } from 'discord.js';
 const GUILD_CACHE_PREFIX = 'guild:by_id:';
 const GUILD_CACHE_TTL_MS = 5 * 60 * 1000;
 
+const MANAGED_CHANNELS_CACHE_PREFIX = 'guild:managed_channels:';
+const MANAGED_CHANNELS_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
 const guildCacheKey = (guildId: string) => `${GUILD_CACHE_PREFIX}${guildId}`;
+const managedChannelsCacheKey = (guildId: string) => `${MANAGED_CHANNELS_CACHE_PREFIX}${guildId}`;
+
+export enum RoleManager {
+    audit = 'audit',
+    build = 'build',
+    warChest = 'warChest',
+}
 
 export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
     const { _id, ...withoutId } = guildData as unknown as {
@@ -20,6 +34,7 @@ export const updateGuildData = async (guildData: AllyGuildDataInterface) => {
         .updateOne({ guild_id: guildData.guild_id }, { $set: withoutId }, { upsert: true });
 
     await Cache.getCache().set(guildCacheKey(guildData.guild_id), withoutId, GUILD_CACHE_TTL_MS);
+    await Cache.getCache().delete(managedChannelsCacheKey(guildData.guild_id));
 };
 
 export const getGuildDataByGuildId = async (guildId: string) => {
@@ -37,17 +52,56 @@ export const getGuildDataByGuildId = async (guildId: string) => {
     return doc;
 };
 
+const getManagedChannels = async (guildId: string) => {
+    const cached = await Cache.getCache().get<AllyGuildDataInterface['managed_channels']>(
+        managedChannelsCacheKey(guildId),
+    );
+    if (cached) return cached;
+
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData || !guildData.managed_channels) return null;
+    const { managed_channels } = guildData;
+
+    await Cache.getCache().set(
+        managedChannelsCacheKey(guildId),
+        managed_channels,
+        MANAGED_CHANNELS_CACHE_TTL_MS,
+    );
+
+    return managed_channels;
+};
+
 export const getNationIdFromManagedChannelId = async (
     guildId: string,
     channelId: string,
 ): Promise<string | null> => {
-    const guildData = await getGuildDataByGuildId(guildId);
-    if (!guildData || !guildData.managed_channels) return null;
-    const { managed_channels } = guildData;
-    const channel = managed_channels[channelId];
+    const managedChannels = await getManagedChannels(guildId);
+    if (!managedChannels) return null;
+    const channel = managedChannels[channelId];
     if (!channel) return null;
 
     return channel.nation_id;
+};
+
+export const getManagedChannelDataFromChannelId = async (guildId: string, channelId: string) => {
+    const managedChannels = await getManagedChannels(guildId);
+    return managedChannels?.[channelId];
+};
+
+export const updateManagedChannelDataByChannelId = async (
+    guildId: string,
+    channelId: string,
+    channelData: AllyManagedChannel,
+) => {
+    await (await Database.getDatabase())
+        .collection('guilds')
+        .updateOne(
+            { guild_id: guildId },
+            { $set: { [`managed_channels.${channelId}`]: channelData } },
+        );
+
+    await Cache.getCache().delete(guildCacheKey(guildId));
+    await Cache.getCache().delete(managedChannelsCacheKey(guildId));
 };
 
 export const linkChannelId = async (
@@ -68,6 +122,11 @@ export const linkChannelId = async (
     await updateGuildData(guildData);
 };
 
+/**
+ * @deprecated Audit Levels will be removed
+ * @param guildId
+ * @param levelData
+ */
 export const addAuditLevel = async (guildId: string, levelData: AllyGuildAuditLevel) => {
     const guildData = await getGuildDataByGuildId(guildId);
     if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addAuditRole');
@@ -258,6 +317,12 @@ export const verifyAdminPermission = async (
     return admins.includes(username);
 };
 
+/**
+ * @deprecated User verifyRole()
+ * @param guildId
+ * @param user
+ * @returns
+ */
 export const verifyAuditPermission = async (
     guildId: string,
     user: GuildMember,
@@ -272,4 +337,35 @@ export const verifyAuditPermission = async (
     }
 
     return user.roles.cache.has(application_settings.audit.audit_role_id);
+};
+
+export const verifyRole = async (guildId: string, user: GuildMember, role: RoleManager) => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'verifyRole');
+
+    const { application_settings } = guildData as AllyGuildDataInterface;
+    if (!application_settings || !application_settings.roles || !application_settings.roles[role]) {
+        return false;
+    }
+
+    return user.roles.cache.has(application_settings.roles[role]);
+};
+
+export const addRole = async (guildId: string, roleId: string, role: RoleManager) => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addRole');
+
+    const guild = guildData as AllyGuildDataInterface;
+
+    if (!guild.application_settings) {
+        guild.application_settings = {} as AllyGuildDataInterface['application_settings'];
+    }
+
+    if (!guild.application_settings.roles) {
+        guild.application_settings.roles = {};
+    }
+
+    guild.application_settings.roles[role] = roleId;
+
+    await updateGuildData(guild);
 };
