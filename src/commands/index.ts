@@ -186,6 +186,7 @@ export const commandList: DiscordCommandType[] = [
                                 description:
                                     'Users with this role will be allowed to assign build templates',
                                 type: ApplicationCommandOptionType.Role,
+                                required: true,
                             },
                         ],
                     },
