@@ -361,7 +361,7 @@ export const addRole = async (guildId: string, roleId: string, role: RoleManager
         guild.application_settings = {} as AllyGuildDataInterface['application_settings'];
     }
 
-    if (!guild.application_settings.roles) {
+    if (!guild.application_settings?.roles) {
         guild.application_settings.roles = {};
     }
 

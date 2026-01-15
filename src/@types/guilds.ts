@@ -6,7 +6,7 @@ export interface AllyGuildDataInterface {
     welcome_channel: string;
     verified_role: string;
     unverified_role: string;
-    application_settings?: AllyGuildApplicationSettings;
+    application_settings: AllyGuildApplicationSettings;
     managed_channels: {
         [channel_id: string]: AllyManagedChannel;
     };
@@ -30,7 +30,7 @@ export interface AllyManagedChannel {
 export interface AllyGuildApplicationSettings {
     application_category_id?: string;
     membership_role?: string;
-    ia_role: string;
+    ia_role?: string;
     audit?: {
         audit_role_id: string;
         audit_channel_id: string;
