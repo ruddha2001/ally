@@ -208,7 +208,7 @@ export const memberHandler = async (command: ChatInputCommandInteraction) => {
         if (error instanceof AllyError) {
             throw error;
         } else {
-            throw new AllyError('Encountered unexpected error', 'settingsHandler');
+            throw new AllyError('Encountered unexpected error', 'memberHandler');
         }
     }
 };
