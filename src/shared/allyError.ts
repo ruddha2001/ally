@@ -80,7 +80,7 @@ Please run \`/settings audit show\` to see which role you need for this operatio
             );
         case 'NO_VALID_ROLE':
             throw new AllyError(
-                `User does not have audit role`,
+                `User does not have required role`,
                 functionName,
                 `You do not have the required role added for yourself.
 Please contact an admin to get the required role`,
