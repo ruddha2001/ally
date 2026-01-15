@@ -23,7 +23,3 @@ Thumbs.db
 # Optional: coverage and test output
 coverage/
 
-# Optional: lock files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
