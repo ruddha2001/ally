@@ -23,6 +23,7 @@ export enum STATIC_ERROR_CODES {
     MISSING_AUDIT_DATA = 'MISSING_AUDIT_DATA',
     NO_AUDIT_ROLE = 'NO_AUDIT_ROLE',
     SERVER_NOT_REGISTERED = 'SERVER_NOT_REGISTERED',
+    TICKET_NOT_LINKED = 'TICKET_NOT_LINKED',
     USER_NOT_PRIVILEGED = 'USER_NOT_PRIVILEGED',
     USER_NOT_REGISTERED = 'USER_NOT_REGISTERED',
 }
@@ -78,6 +79,14 @@ Please run \`/settings audit show\` to see which role you need for this operatio
 As a PnW Alliance Management Bot, I can help you only in alliance servers.
 
 If you are the mighty Alliance Leader, please run the command \`/setup\` so that I can connect this server to your alliance. Only an Alliance Leader can register an alliance.`,
+            );
+        case 'TICKET_NOT_LINKED':
+            throw new AllyError(
+                `Ticket is not registered to any nation`,
+                functionName,
+                `This channel is not a ticket that is registered to any nation.
+If the nation has a Discord account, please ask them to register with Ally inside this channel.
+If the nation is a non-Discord user, please convert this channel to a ticket from Ally Web Portal`,
             );
         case 'USER_NOT_REGISTERED':
             throw new AllyError(
