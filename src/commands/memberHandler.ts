@@ -141,7 +141,7 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
                 );
             }
 
-            submission.editReply({
+            await submission.editReply({
                 embeds: [
                     buildDiscordEmbed({
                         type: EmbedType.member,
