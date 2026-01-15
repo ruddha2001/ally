@@ -180,6 +180,14 @@ export const commandList: DiscordCommandType[] = [
                         description:
                             '[Admin Only] Specify the role that allows setting build templates',
                         type: ApplicationCommandOptionType.Subcommand,
+                        options: [
+                            {
+                                name: 'build_role',
+                                description:
+                                    'Users with this role will be allowed to assign build templates',
+                                type: ApplicationCommandOptionType.Role,
+                            },
+                        ],
                     },
                 ],
             },

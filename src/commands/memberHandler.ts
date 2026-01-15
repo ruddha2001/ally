@@ -9,9 +9,11 @@ import {
 } from 'discord.js';
 import { AllyError, STATIC_ERROR_CODES, throwStaticError } from '../shared/allyError.js';
 import {
+    addRole,
     getManagedChannelDataFromChannelId,
     RoleManager,
     updateManagedChannelDataByChannelId,
+    verifyAdminPermission,
     verifyRole,
 } from '../services/guildService.js';
 import { AllyManagedChannel } from '../@types/guilds.js';
@@ -74,8 +76,8 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
 
     const levelNameInput = new TextInputBuilder()
         .setCustomId('templateString')
-        .setLabel('Enter the build template JSON')
-        .setPlaceholder('Some Crazy Name')
+        .setLabel('Enter the build template')
+        .setPlaceholder('JSON Build Template')
         .setStyle(TextInputStyle.Paragraph)
         .setRequired(true);
 
@@ -95,12 +97,28 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
 
             let templateString = submission.fields.getTextInputValue('templateString');
             if (!templateString || templateString.length === 0) {
-                throwStaticError(STATIC_ERROR_CODES.INVALID_JSON_STRING, 'buildSetHandler');
+                return submission.editReply({
+                    embeds: [
+                        buildDiscordEmbed({
+                            type: EmbedType.error,
+                            title: `Empty value was passed`,
+                            description: `You must enter a valid JSON build template`,
+                        }),
+                    ],
+                });
             }
             try {
                 templateString = JSON.stringify(JSON.parse(templateString));
             } catch {
-                throwStaticError(STATIC_ERROR_CODES.INVALID_JSON_STRING, 'buildSetHandler');
+                return submission.editReply({
+                    embeds: [
+                        buildDiscordEmbed({
+                            type: EmbedType.error,
+                            title: `Malformed JSON was passed`,
+                            description: `You must enter a valid JSON build template`,
+                        }),
+                    ],
+                });
             }
 
             const { templates, nation_id } = channelData as AllyManagedChannel;
@@ -140,6 +158,29 @@ const buildSetHandler = async (command: ChatInputCommandInteraction) => {
     }
 };
 
+const buildRoleHandler = async (command: ChatInputCommandInteraction) => {
+    const { user, guildId } = command;
+
+    const isAdmin = await verifyAdminPermission(guildId as string, user.username);
+    if (!isAdmin) {
+        return throwStaticError(STATIC_ERROR_CODES.USER_NOT_PRIVILEGED, 'buildRoleHandler');
+    }
+
+    const buildRole = command.options.getRole('build_role', true);
+
+    await addRole(guildId as string, buildRole.id, RoleManager.build);
+
+    await command.editReply({
+        embeds: [
+            buildDiscordEmbed({
+                type: EmbedType.member,
+                title: `Build role has been set!`,
+                description: `Users with ${buildRole.toString()} can now assign build templates to members.`,
+            }),
+        ],
+    });
+};
+
 export const memberHandler = async (command: ChatInputCommandInteraction) => {
     try {
         const group = command.options.getSubcommandGroup();
@@ -154,6 +195,12 @@ export const memberHandler = async (command: ChatInputCommandInteraction) => {
                 case 'set':
                     await buildSetHandler(command);
                     return;
+                case 'role':
+                    await command.deferReply();
+                    await buildRoleHandler(command);
+                    break;
+                default:
+                    throw Error();
             }
         }
     } catch (error) {

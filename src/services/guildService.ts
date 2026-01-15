@@ -350,3 +350,17 @@ export const verifyRole = async (guildId: string, user: GuildMember, role: RoleM
 
     return user.roles.cache.has(application_settings.roles[role]);
 };
+
+export const addRole = async (guildId: string, roleId: string, role: RoleManager) => {
+    const guildData = await getGuildDataByGuildId(guildId);
+    if (!guildData) throwStaticError(STATIC_ERROR_CODES.SERVER_NOT_REGISTERED, 'addRole');
+
+    const { application_settings } = guildData as AllyGuildDataInterface;
+    if (!application_settings?.roles) {
+        application_settings!.roles = {};
+    }
+
+    guildData!.application_settings!.roles![role] = roleId;
+
+    await updateGuildData(guildData as AllyGuildDataInterface);
+};
